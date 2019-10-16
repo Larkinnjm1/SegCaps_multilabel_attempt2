@@ -1,6 +1,8 @@
 # Matwo-CapsNet
 Implementation of the MICCAI 2019 Paper "Matwo-CapsNet: a Multi-Label Semantic Segmentation Capsules Network". With modifications performed to analyze information around increased configurability. Original source code from  
 
+https://github.com/savinienb/Matwo-CapsNet
+
 ## References
 This code make use of the following projects:
 Main source code base:
