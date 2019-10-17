@@ -1,36 +1,6 @@
 # Matwo-CapsNet
-Implementation of the MICCAI 2019 Paper "Matwo-CapsNet: a Multi-Label Semantic Segmentation Capsules Network". With modifications performed to analyze information around increased configurability. Original source code from  
+Implementation of the MICCAI 2019 Paper "Matwo-CapsNet: a Multi-Label Semantic Segmentation Capsules Network". 
 
-https://github.com/savinienb/Matwo-CapsNet
-
-## References
-This code make use of the following projects:
-Main source code base:
-
-https://github.com/savinienb/Matwo-CapsNet
-
-
-
-[Framework](https://github.com/christianpayer/MedicalDataAugmentationTool)
-```
-@inproceedings{Payer2018a,
-  title     = {Multi-label Whole Heart Segmentation Using {CNNs} and Anatomical Label Configurations},
-  author    = {Payer, Christian and {\v{S}}tern, Darko and Bischof, Horst and Urschler, Martin},
-  booktitle = {Statistical Atlases and Computational Models of the Heart. ACDC and MMWHS Challenges. STACOM 2017},
-  doi       = {10.1007/978-3-319-75541-0_20},
-  pages     = {190--198},
-  year      = {2018},
-}
-```
-
-[Segcaps](https://github.com/lalonderodney/SegCaps)
-```
-@article{lalonde2018capsules,
-  title={Capsules for Object Segmentation},
-  author={LaLonde, Rodney and Bagci, Ulas},
-  journal={arXiv preprint arXiv:1804.04241},
-  year={2018}
-}
 
 ## Matwo-Caps
 <img src="./Images/Matwo-Caps.png" width="450px"/>
