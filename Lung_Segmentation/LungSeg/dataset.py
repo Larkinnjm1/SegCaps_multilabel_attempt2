@@ -48,7 +48,7 @@ class Dataset(object):
         self.data_aug=data_aug
         self.save_debug_images = save_debug_images
         self.dim = 2
-        self.num_labels = 6
+        self.num_labels =num_labels
         self.image_base_folder = os.path.join(self.base_folder,'images')
         self.setup_base_folder = os.path.join(self.base_folder, 'setup')
         self.mask_base_folder = os.path.join(self.base_folder,'masks')

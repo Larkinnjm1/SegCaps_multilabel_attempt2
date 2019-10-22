@@ -26,7 +26,7 @@ def spread_loss(labels,logits,m_low=0.2,m_hight=0.9,iteration_low_to_high=100000
 
 
 def weighted_spread_loss(labels,logits,m_low=0.2,m_hight=0.9,iteration_low_to_high=100000,global_step=100000, data_format='channels_first'):
-  w_l=np.array([0.00705479,0.03312549,0.02664785,0.4437354 ,0.44254721,0.04688926]) * 6
+  w_l=np.array([0.03987201, 0.36867433, 0.35872208, 0.2314718 , 0.00125978]) * 5
   channel_index = get_channel_index(labels, data_format)
   
   m=m_low+(m_hight-m_low)*tf.minimum(tf.to_float(global_step/iteration_low_to_high),tf.to_float(1))
@@ -49,7 +49,7 @@ def weighted_spread_loss(labels,logits,m_low=0.2,m_hight=0.9,iteration_low_to_hi
   return loss
 
 def weighted_softmax(labels, logits, data_format='channels_first'):
-  w_l=np.array([0.00705479,0.03312549,0.02664785,0.4437354 ,0.44254721,0.04688926]) * 6
+  w_l=np.array([0.03987201, 0.36867433, 0.35872208, 0.2314718 , 0.00125978]) * 5
   channel_index = get_channel_index(labels, data_format)
   loss_s=tf.nn.softmax_cross_entropy_with_logits_v2(labels = labels, logits = logits, dim = channel_index)
 

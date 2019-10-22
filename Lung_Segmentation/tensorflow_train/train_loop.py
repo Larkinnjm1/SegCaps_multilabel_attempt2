@@ -201,6 +201,7 @@ class MainLoopBase(object):
         self.print_training_parameters()
         try:
             while self.current_iter <= self.max_iter:
+                print('Current Iteration',self.current_iter)
                 # snapshot
                 if (self.current_iter % self.snapshot_iter) == 0 and not self.first_iteration:
                     self.snapshot()

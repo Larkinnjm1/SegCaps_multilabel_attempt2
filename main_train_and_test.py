@@ -176,7 +176,7 @@ if __name__ == '__main__':
     #parameter=[[spread_loss,MatVec_CapsNet,'dual']]
     parameter=[{'loss_function':weighted_softmax,'network':SegCaps_multilabels,
                 'routing_type':'','batch_size':1,'max_iter':5000,
-                'test_iter':20,'data_aug':False,'num_labels':5,'learning_rates':[0.1,0.1],
+                'test_iter':250,'data_aug':False,'num_labels':5,'learning_rates':[1,1],
                 'data_format':'channels_first',
                 'save_debug_images':False,'image_size':[256,256]}]
     #parameter=[[weighted_spread_loss,SegCaps_multilabels,'']]
