@@ -34,31 +34,31 @@ def SegCaps_multilabels(input_shape, is_training, num_labels, data_format):
         conv1_reshaped = layers.Reshape((H, W, 1, C))(conv1)
 
         # Layer 1: Primary Capsule: Conv cap with routing 1
-        primary_caps = ConvCapsuleLayer(kernel_size=5, num_capsule=6, num_atoms=32, strides=2, padding='same',
+        primary_caps = ConvCapsuleLayer(kernel_size=5, num_capsule=5, num_atoms=32, strides=2, padding='same',
                                         routings=1, name='primarycaps',is_training=is_training)(conv1_reshaped)
 
         # Layer 2: Convolutional Capsule
-        conv_cap_2_1 = ConvCapsuleLayer(kernel_size=5, num_capsule=6, num_atoms=32, strides=1, padding='same',
+        conv_cap_2_1 = ConvCapsuleLayer(kernel_size=5, num_capsule=5, num_atoms=32, strides=1, padding='same',
                                         routings=3, name='conv_cap_2_1',is_training=is_training)(primary_caps)
 
         # Layer 2: Convolutional Capsule
-        conv_cap_2_2 = ConvCapsuleLayer(kernel_size=5, num_capsule=6, num_atoms=32, strides=2, padding='same',
+        conv_cap_2_2 = ConvCapsuleLayer(kernel_size=5, num_capsule=5, num_atoms=32, strides=2, padding='same',
                                         routings=3, name='conv_cap_2_2',is_training=is_training)(conv_cap_2_1)
 
         # Layer 3: Convolutional Capsule
-        conv_cap_3_1 = ConvCapsuleLayer(kernel_size=5, num_capsule=8, num_atoms=32, strides=1, padding='same',
+        conv_cap_3_1 = ConvCapsuleLayer(kernel_size=5, num_capsule=7, num_atoms=32, strides=1, padding='same',
                                         routings=3, name='conv_cap_3_1',is_training=is_training)(conv_cap_2_2)
 
         # Layer 3: Convolutional Capsule
-        conv_cap_3_2 = ConvCapsuleLayer(kernel_size=5, num_capsule=8, num_atoms=64, strides=2, padding='same',
+        conv_cap_3_2 = ConvCapsuleLayer(kernel_size=5, num_capsule=7, num_atoms=64, strides=2, padding='same',
                                         routings=3, name='conv_cap_3_2',is_training=is_training)(conv_cap_3_1)
 
         # Layer 4: Convolutional Capsule
-        conv_cap_4_1 = ConvCapsuleLayer(kernel_size=5, num_capsule=8, num_atoms=32, strides=1, padding='same',
+        conv_cap_4_1 = ConvCapsuleLayer(kernel_size=5, num_capsule=7, num_atoms=32, strides=1, padding='same',
                                         routings=3, name='conv_cap_4_1',is_training=is_training)(conv_cap_3_2)
 
         # Layer 1 Up: Deconvolutional Capsule
-        deconv_cap_1_1 = DeconvCapsuleLayer(kernel_size=4, num_capsule=8, num_atoms=32, upsamp_type='deconv',
+        deconv_cap_1_1 = DeconvCapsuleLayer(kernel_size=4, num_capsule=7, num_atoms=32, upsamp_type='deconv',
                                             scaling=2, padding='same', routings=3,
                                             name='deconv_cap_1_1',is_training=is_training)(conv_cap_4_1)
 
@@ -67,11 +67,11 @@ def SegCaps_multilabels(input_shape, is_training, num_labels, data_format):
         up_1 = layers.Concatenate(axis=-2, name='up_1')([deconv_cap_1_1, conv_cap_3_1])
 
         # Layer 1 Up: Deconvolutional Capsule
-        deconv_cap_1_2 = ConvCapsuleLayer(kernel_size=5, num_capsule=6, num_atoms=32, strides=1,
+        deconv_cap_1_2 = ConvCapsuleLayer(kernel_size=5, num_capsule=5, num_atoms=32, strides=1,
                                           padding='same', routings=3, name='deconv_cap_1_2',is_training=is_training)(up_1)
 
         # Layer 2 Up: Deconvolutional Capsule
-        deconv_cap_2_1 = DeconvCapsuleLayer(kernel_size=4, num_capsule=6, num_atoms=32, upsamp_type='deconv',
+        deconv_cap_2_1 = DeconvCapsuleLayer(kernel_size=4, num_capsule=5, num_atoms=32, upsamp_type='deconv',
                                             scaling=2, padding='same', routings=3,
                                             name='deconv_cap_2_1',is_training=is_training)(deconv_cap_1_2)
 
@@ -79,11 +79,11 @@ def SegCaps_multilabels(input_shape, is_training, num_labels, data_format):
         up_2 = layers.Concatenate(axis=-2, name='up_2')([deconv_cap_2_1, conv_cap_2_1])
 
         # Layer 2 Up: Deconvolutional Capsule
-        deconv_cap_2_2 = ConvCapsuleLayer(kernel_size=5, num_capsule=6, num_atoms=32, strides=1,
+        deconv_cap_2_2 = ConvCapsuleLayer(kernel_size=5, num_capsule=5, num_atoms=32, strides=1,
                                           padding='same', routings=3, name='deconv_cap_2_2',is_training=is_training)(up_2)
 
         # Layer 3 Up: Deconvolutional Capsule
-        deconv_cap_3_1 = DeconvCapsuleLayer(kernel_size=4, num_capsule=6, num_atoms=32, upsamp_type='deconv',
+        deconv_cap_3_1 = DeconvCapsuleLayer(kernel_size=4, num_capsule=5, num_atoms=32, upsamp_type='deconv',
                                             scaling=2, padding='same', routings=3,
                                             name='deconv_cap_3_1',is_training=is_training)(deconv_cap_2_2)
 
