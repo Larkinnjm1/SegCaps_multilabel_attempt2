@@ -23,5 +23,9 @@ class Composite(SpatialTransformBase):
         """
         compos = sitk.Transform(self.dim, sitk.sitkIdentity)
         for i in range(len(self.transformations)):
+            
+            
             compos.AddTransform(self.transformations[i].get(**kwargs))
+
+            
         return compos

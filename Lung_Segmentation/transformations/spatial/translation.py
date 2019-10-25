@@ -50,15 +50,17 @@ class Random(TranslateTransformBase):
     """
     A translation transformation with a random offset.
     """
-    def __init__(self, dim, random_offset):
+    def __init__(self, dim, random_offset): #
         """
         Initializer.
         :param dim: The dimension.
         :param random_offset: List of random offsets per dimension. Random offset is calculated uniformly within [-random_offset[i], random_offset[i]]
         """
         super(Random, self).__init__(dim)
+        #allowed_keys = {'random_offset'}
         self.random_offset = random_offset
-
+        #self.__dict__.update((k, v) for k, v in kwargs.items() if k in allowed_keys)
+        
     def get(self, **kwargs):
         """
         Returns the sitk transform based on the given parameters.

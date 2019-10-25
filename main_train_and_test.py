@@ -4,7 +4,7 @@ sys.path.append("./Lung_Segmentation")
 from collections import OrderedDict
 import tensorflow as tf
 import numpy as np
-
+import json
 import tensorflow_train.utils.tensorflow_util
 from tensorflow_train.data_generator import DataGenerator
 from tensorflow_train.losses.semantic_segmentation_losses import softmax, weighted_softmax, spread_loss, weighted_spread_loss
@@ -45,13 +45,19 @@ class MainLoop(MainLoopBase):
         self.image_size = param['image_size']#[128, 128] 
         self.image_spacing = [1, 1]
         self.output_folder = './Experiments/' + self.network.__name__ + '_' + self.output_folder_timestamp()
+        #Opening augmentation dictionary for analysis
+        with open(param['aug_dict_path'],'r') as fb:
+            self.aug_dict=json.load(fb)
+        
+        
         self.dataset = Dataset(image_size = self.image_size,
                                image_spacing = self.image_spacing,
                                num_labels = self.num_labels,
                                base_folder = self.base_folder,
                                data_format = self.data_format,
                                save_debug_images = self.save_debug_images,
-                               data_aug=self.data_aug)
+                               data_aug=self.data_aug,
+                               transform_dict=self.aug_dict)
 
         self.dataset_train = self.dataset.dataset_train()
         self.dataset_train.get_next()

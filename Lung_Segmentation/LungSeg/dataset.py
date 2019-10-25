@@ -1,8 +1,9 @@
 import os
-
+import sys
 import numpy as np
 import SimpleITK as sitk
-
+import ipdb
+sys.path.append(r"U:\SegCaps_multilabel_attempt2\Lung_Segmentation")
 from datasets.reference_image_transformation_dataset import ReferenceTransformationDataset
 from datasources.cached_image_datasource import CachedImageDataSource
 from generators.image_generator import ImageGenerator
@@ -25,6 +26,7 @@ class Dataset(object):
                  num_labels,
                  base_folder,
                  data_aug,
+                 transform_dict,
                  input_gaussian_sigma=1.0,
                  label_gaussian_sigma=1.0,
                  data_format='channels_first',
@@ -49,6 +51,7 @@ class Dataset(object):
         self.save_debug_images = save_debug_images
         self.dim = 2
         self.num_labels =num_labels
+        self.transform_dict=transform_dict
         self.image_base_folder = os.path.join(self.base_folder,'images')
         self.setup_base_folder = os.path.join(self.base_folder, 'setup')
         self.mask_base_folder = os.path.join(self.base_folder,'masks')
@@ -113,9 +116,20 @@ class Dataset(object):
         :return: The processed image.
         """
         image = normalize_robust(image)
-        return ShiftScaleClamp(random_shift=0.2,
-                               random_scale=0.4,
-                               clamp_min=-1.0)(image)
+        
+        shiftscale_func=self.mod_pst_prc_mr_rand_args()
+        
+        return shiftscale_func(image)
+        
+    def mod_pst_prc_mr_rand_args(self):
+        
+        #random_shift=0.2
+        #random_scale=0.4
+        #clamp_min=-1.0
+        
+        return ShiftScaleClamp(self.transform_dict['intensity']['random_shift'],
+                               self.transform_dict['intensity']['random_scale'],
+                              self.transform_dict['intensity']['clamp_min'])
 
     def intensity_postprocessing_mr(self, image):
         """
@@ -131,16 +145,62 @@ class Dataset(object):
         The spatial image transformation with random augmentation.
         :return: The transformation.
         """
+        
+        commands=self.mod_spat_aug()
+        
         return composite.Composite(self.dim,
-                                   [translation.InputCenterToOrigin(self.dim),
-                                    scale.Fit(self.dim, self.image_size, self.image_spacing),
-                                    translation.Random(self.dim, [20, 20]),
-                                    rotation.Random(self.dim, [0.35]),
-                                    scale.RandomUniform(self.dim, 0.2),
-                                    scale.Random(self.dim, [0.1, 0.1]),
-                                    translation.OriginToOutputCenter(self.dim, self.image_size, self.image_spacing),
-                                    deformation.Output(self.dim, [8, 8], 15, self.image_size, self.image_spacing)]
-                                   )
+                                   commands)
+        
+    
+    def mod_spat_aug(self):
+        """
+        The purpose of this method is to take an dictoinary input from the user to determine data augmentation that will
+        be utilised in the process for analysis
+        """
+        
+        
+        trial_dict={'translation_input_centre':[self.transform_dict['spatial']['trans_input_centre_bool'],
+                                                translation.InputCenterToOrigin(self.dim)],
+                    'scale_fit':[self.transform_dict['spatial']['scale_fit_bool'],
+                                 scale.Fit(self.dim,
+                                           self.image_size,
+                                           self.image_spacing)],
+                    'translation_random':[self.transform_dict['spatial']['trans_rand_bool'],
+                                          translation.Random(self.dim,
+                                                             self.transform_dict['spatial']['trans_rand_random_ofs_arg'])],
+                    'rotation_random':[self.transform_dict['spatial']['rot_rand_bool'],
+                                       rotation.Random(self.dim,
+                                                       self.transform_dict['spatial']['rotation_random_angle_arg'])],
+                    'scale_random_uniform':[self.transform_dict['spatial']['rand_scal_uni_bool'],
+                                            scale.RandomUniform(self.dim,
+                                                                self.transform_dict['spatial']['random_scale_uniform_arg'])],
+                    'scale_random':[self.transform_dict['spatial']['rand_scal_non_uni_bool'],
+                                    scale.Random(self.dim,
+                                                 self.transform_dict['spatial']['random_scale_non_uniform_arg'])],
+                    'translation_origin_center':[self.transform_dict['spatial']['translate_orig_centre_bool'],
+                                                 translation.OriginToOutputCenter(self.dim,
+                                                                                  self.image_size,
+                                                                                  self.image_spacing)],
+                    'deformation':[self.transform_dict['spatial']['deform_bool'],
+                                   deformation.Output(self.dim,
+                                                      self.transform_dict['spatial']['deformation_key_nodes_arg'],
+                                                      self.transform_dict['spatial']['deformation_max_deform_arg'],
+                                                      self.image_size,
+                                                      self.image_spacing)]} #
+        
+        
+        select_trans=[]
+        #ipdb.set_trace()
+        for k,v in trial_dict.items():
+            
+            if v[0]==True:
+                select_trans.append(v[1])
+            else:
+                continue
+        
+        return select_trans
+    
+    
 
     def spatial_transformation(self):
         """
