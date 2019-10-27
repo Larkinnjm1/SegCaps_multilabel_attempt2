@@ -9,12 +9,12 @@ from datasources.cached_image_datasource import CachedImageDataSource
 from generators.image_generator import ImageGenerator
 from iterators.id_list_iterator import IdListIterator
 from transformations.intensity.np.shift_scale_clamp import ShiftScaleClamp
-from transformations.spatial import translation, scale, composite, rotation, deformation
+from transformations.spatial import translation, scale, composite, rotation, deformation,flip
 from utils.np_image import split_label_image, distance_transform
 from transformations.intensity.sitk.smooth import gaussian as gaussian_sitk
 from transformations.intensity.np.smooth import gaussian
 from transformations.intensity.np.normalize import normalize_robust
-
+import random
 
 class Dataset(object):
     """
@@ -162,26 +162,33 @@ class Dataset(object):
         trial_dict={'translation_input_centre':[self.transform_dict['spatial']['trans_input_centre_bool'],
                                                 translation.InputCenterToOrigin(self.dim)],
                     'scale_fit':[self.transform_dict['spatial']['scale_fit_bool'],
+                                 self.transform_dict['spatial']['scale_fit_prob_thresh_sp'],
                                  scale.Fit(self.dim,
                                            self.image_size,
                                            self.image_spacing)],
                     'translation_random':[self.transform_dict['spatial']['trans_rand_bool'],
+                                          self.transform_dict['spatial']['trans_rand_fit_prob_thresh_sp'],
                                           translation.Random(self.dim,
                                                              self.transform_dict['spatial']['trans_rand_random_ofs_arg'])],
                     'rotation_random':[self.transform_dict['spatial']['rot_rand_bool'],
+                                       self.transform_dict['spatial']['rot_rand_prob_thresh_sp'],
                                        rotation.Random(self.dim,
                                                        self.transform_dict['spatial']['rotation_random_angle_arg'])],
+                    'flip_random':[self.transform_dict['spatial']['flip_rand_bool'],
+                                   self.transform_dict['spatial']['flip_rand_prob_thresh_sp'],
+                                   self.flip.Random(self.dim,
+                                                    self.transform_dict['spatial']['flip_random_scaling_parameter'])],
                     'scale_random_uniform':[self.transform_dict['spatial']['rand_scal_uni_bool'],
+                                            self.transform_dict['spatial']['rand_scal_prob_thresh'],
                                             scale.RandomUniform(self.dim,
                                                                 self.transform_dict['spatial']['random_scale_uniform_arg'])],
-                    'scale_random':[self.transform_dict['spatial']['rand_scal_non_uni_bool'],
-                                    scale.Random(self.dim,
-                                                 self.transform_dict['spatial']['random_scale_non_uniform_arg'])],
                     'translation_origin_center':[self.transform_dict['spatial']['translate_orig_centre_bool'],
+                                                 self.transform_dict['spatial']['translate_orig_centre_thresh'],
                                                  translation.OriginToOutputCenter(self.dim,
                                                                                   self.image_size,
                                                                                   self.image_spacing)],
                     'deformation':[self.transform_dict['spatial']['deform_bool'],
+                                   self.transform_dict['spatial']['deform_prob_thresh'],
                                    deformation.Output(self.dim,
                                                       self.transform_dict['spatial']['deformation_key_nodes_arg'],
                                                       self.transform_dict['spatial']['deformation_max_deform_arg'],
@@ -193,8 +200,10 @@ class Dataset(object):
         #ipdb.set_trace()
         for k,v in trial_dict.items():
             
-            if v[0]==True:
-                select_trans.append(v[1])
+            rand_int_sp=random.sample(0,1)
+            
+            if v[0]==True and rand_int_sp>v[1]:
+                select_trans.append(v[2])
             else:
                 continue
         
