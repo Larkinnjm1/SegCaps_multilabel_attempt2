@@ -188,7 +188,7 @@ class Dataset(object):
                                                       self.image_size,
                                                       self.image_spacing)]} #
         
-        
+        print('transformation being added to process')
         select_trans=[]
         #ipdb.set_trace()
         for k,v in trial_dict.items():

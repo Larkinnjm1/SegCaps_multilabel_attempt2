@@ -21,7 +21,7 @@ class Composite(SpatialTransformBase):
         :param kwargs: Optional parameters sent to the other transformations.
         :return: The composite sitk transform.
         """
-        ipdb.set_trace()
+        print('Composite function being called for analysis')
         compos = sitk.Transform(self.dim, sitk.sitkIdentity)
         for i in range(len(self.transformations)):
             
