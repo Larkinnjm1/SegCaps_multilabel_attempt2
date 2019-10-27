@@ -32,6 +32,7 @@ class MainLoop(MainLoopBase):
         self.learning_rates = param['learning_rates'] #arbitrary value is [1,1]
         self.max_iter = param['max_iter']#arbitrary is 300000
         self.test_iter =param['test_iter']#arbitrary is 10000
+        self.cls_wghts=param['class_weights_arr']
         self.disp_iter = 100
         self.data_aug=param['data_aug']
         self.snapshot_iter = self.test_iter
@@ -99,8 +100,17 @@ class MainLoop(MainLoopBase):
         print ('Net number of parameter : '+ str(var_num))
 
         # losses
-        if 'spread_loss' in self.loss_function.__name__ :
-            self.loss_net = self.loss_function(labels=mask, logits=prediction, global_step=global_step,data_format=self.data_format)
+        if 'weighted_spread_loss' in self.loss_function.__name__:
+            self.loss_net = self.loss_function(labels=mask, logits=prediction,
+                                               global_step=global_step,
+                                               data_format=self.data_format,wl=self.cls_wght)
+        elif 'weighted_softmax' in self.loss_function.__name__:
+            self.loss_net = self.loss_function(labels=mask, logits=prediction,
+                                               data_format=self.data_format,wl=self.cls_wght)
+        
+        elif 'spread_loss' in self.loss_function.__name__ :
+            self.loss_net = self.loss_function(labels=mask, logits=prediction,
+                                               global_step=global_step,data_format=self.data_format)
         else:
             self.loss_net = self.loss_function(labels=mask, logits=prediction, data_format=self.data_format)
 
@@ -184,7 +194,8 @@ if __name__ == '__main__':
                 'routing_type':'','batch_size':1,'max_iter':5000,
                 'test_iter':250,'data_aug':False,'num_labels':5,'learning_rates':[1,1],
                 'data_format':'channels_first',
-                'save_debug_images':False,'image_size':[256,256]}]
+                'save_debug_images':False,'image_size':[256,256],
+                'aug_dict_path':'./aug_dict_dual.json'}]
     #parameter=[[weighted_spread_loss,SegCaps_multilabels,'']]
     
     for param in parameter:

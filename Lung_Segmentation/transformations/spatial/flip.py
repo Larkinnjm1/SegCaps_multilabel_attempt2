@@ -17,7 +17,7 @@ class FlipTransformBase(SpatialTransformBase):
         :return: The sitk.AffineTransform().
         """
         assert len(flip_axes) == dim, 'flip_axes must have length that is equal to dimension.'
-
+        
         # a flip is implemented by scaling the image axis by -1.0
         scale_factors = [-1.0 if f else 1.0 for f in flip_axes]
 

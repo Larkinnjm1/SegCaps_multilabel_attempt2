@@ -1,6 +1,6 @@
 
 from datasets.basic_dataset import BasicDataset
-
+import ipdb
 
 class ReferenceTransformationDataset(BasicDataset):
     """
@@ -96,6 +96,7 @@ class ReferenceTransformationDataset(BasicDataset):
         # update generators
         generated_values = {}
         transformations = {}
+        ipdb.set_trace()
         for key, data_generator in self.data_generators.items():
             kwarguments = dict([(key, datasource_values[value]) for key, value in self.data_generator_sources[key].items()])
             current_transformation = data_generator.get_transformation(base_transformation=base_transformation, **reference_datasource_dict)
