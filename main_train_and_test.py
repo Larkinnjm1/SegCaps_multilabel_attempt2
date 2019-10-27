@@ -103,10 +103,10 @@ class MainLoop(MainLoopBase):
         if 'weighted_spread_loss' in self.loss_function.__name__:
             self.loss_net = self.loss_function(labels=mask, logits=prediction,
                                                global_step=global_step,
-                                               data_format=self.data_format,wl=self.cls_wght)
+                                               data_format=self.data_format,w_l=self.cls_wghts)
         elif 'weighted_softmax' in self.loss_function.__name__:
             self.loss_net = self.loss_function(labels=mask, logits=prediction,
-                                               data_format=self.data_format,wl=self.cls_wght)
+                                               data_format=self.data_format,w_l=self.cls_wghts)
         
         elif 'spread_loss' in self.loss_function.__name__ :
             self.loss_net = self.loss_function(labels=mask, logits=prediction,
@@ -195,7 +195,7 @@ if __name__ == '__main__':
                 'test_iter':250,'data_aug':False,'num_labels':5,'learning_rates':[1,1],
                 'data_format':'channels_first',
                 'save_debug_images':False,'image_size':[256,256],
-                'aug_dict_path':'./aug_dict_dual.json'}]
+                'aug_dict_path':'./aug_dict_dual.json','class_weights_arr':np.array([0.03987201, 0.36867433, 0.35872208, 0.2314718 , 0.00125978])}]
     #parameter=[[weighted_spread_loss,SegCaps_multilabels,'']]
     
     for param in parameter:

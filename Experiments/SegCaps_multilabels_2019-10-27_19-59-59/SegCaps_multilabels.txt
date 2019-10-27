@@ -1,0 +1,49 @@
+aug_dict={'intensity': {'random_shift': 0.2, 'random_scale': 0.4, 'clamp_min': -1.0}, 'spatial': {'trans_input_centre_bool': True, 'scale_fit_bool': True, 'trans_rand_bool': True, 'trans_rand_random_ofs_arg': [20, 20], 'rot_rand_bool': True, 'rotation_random_angle_arg': [0.35], 'rand_scal_uni_bool': True, 'random_scale_uniform_arg': 0.2, 'rand_scal_non_uni_bool': True, 'random_scale_non_uniform_arg': [0.1, 0.1], 'translate_orig_centre_bool': True, 'deform_bool': True, 'deformation_key_nodes_arg': [8, 8], 'deformation_max_deform_arg': 15}}
+base_folder=./Dataset/
+batch_size=1
+channel_axis=1
+cls_wghts=[0.03987201 0.36867433 0.35872208 0.2314718  0.00125978]
+current_iter=0
+data_aug=False
+data_format=channels_first
+data_val=Tensor("placeholder_data_1:0", shape=(1, 1, 256, 256), dtype=float32)
+dataset=<LungSeg.dataset.Dataset object at 0x7fa6e6ae4a20>
+dataset_train=<datasets.reference_image_transformation_dataset.ReferenceTransformationDataset object at 0x7fa6e696e7b8>
+dataset_val=<datasets.reference_image_transformation_dataset.ReferenceTransformationDataset object at 0x7fa6cc127f60>
+dice_names=['dice_0', 'dice_1', 'dice_2', 'dice_3', 'dice_4']
+disp_iter=100
+first_iteration=True
+image_size=[256, 256]
+image_spacing=[1, 1]
+is_closed=False
+layer_weight_inspector=None
+layer_weight_summary_iter=None
+learning_rate=None
+learning_rates=[1, 1]
+load_model_filename=None
+loss=Tensor("Mean:0", shape=(), dtype=float32)
+loss_function=weighted_softmax
+loss_net=Tensor("Mean:0", shape=(), dtype=float32)
+loss_val=Tensor("testing/Mean:0", shape=(), dtype=float32)
+mask_val=Tensor("placeholder_mask_1:0", shape=(1, 5, 256, 256), dtype=float32)
+max_iter=5000
+net_file=./Lung_Segmentation/LungSeg/SegCaps/SegCaps.py
+network=SegCaps_multilabels
+num_labels=5
+optimization_function=None
+optimizer=Adadelta
+output_folder=./Experiments/SegCaps_multilabels_2019-10-27_19-59-59
+prediction_val=Tensor("testing/net/caps/Squeeze:0", shape=(1, 5, 256, 256), dtype=float32)
+routing_type=
+save_debug_images=False
+saver=<tensorflow.python.training.saver.Saver object at 0x7fa62a132630>
+snapshot_iter=250
+test_initialization=False
+test_iter=250
+threads=[]
+train_loss_aggregator=<tensorflow_train.utils.summary_handler.SummaryHandler object at 0x7fa6e6ae4898>
+train_losses=OrderedDict([('loss', <tf.Tensor 'Mean:0' shape=() dtype=float32>)])
+train_queue=<tensorflow_train.data_generator.DataGenerator object at 0x7fa6e6ae47f0>
+val_loss_aggregator=<tensorflow_train.utils.summary_handler.SummaryHandler object at 0x7fa64162ca20>
+val_losses=OrderedDict([('loss', <tf.Tensor 'testing/Mean:0' shape=() dtype=float32>)])
+val_queue=None
