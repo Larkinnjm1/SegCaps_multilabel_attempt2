@@ -1,5 +1,6 @@
 import SimpleITK as sitk
 from transformations.spatial.base import SpatialTransformBase
+import random
 import ipdb
 
 class Composite(SpatialTransformBase):
@@ -25,8 +26,10 @@ class Composite(SpatialTransformBase):
         compos = sitk.Transform(self.dim, sitk.sitkIdentity)
         for i in range(len(self.transformations)):
             
+            rand_int_sp=random.sample(0,1)
             
-            compos.AddTransform(self.transformations[i].get(**kwargs))
-
-            
+            if rand_int_sp>self.transformations[i][0]:
+                print('transformation added',self.transformations[i][1])
+                compos.AddTransform(self.transformations[i][1].get(**kwargs))
+        
         return compos

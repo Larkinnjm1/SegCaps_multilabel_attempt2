@@ -160,7 +160,7 @@ class Dataset(object):
         """
         
         
-        trial_dict={'translation_input_centre':[self.transform_dict['spatial']['trans_input_centre_bool'],
+        trial_dict={'translation_input_centre':[self.transform_dict['spatial']['trans_input_centre_bool'],0.001
                                                 translation.InputCenterToOrigin(self.dim)],
                     'scale_fit':[self.transform_dict['spatial']['scale_fit_bool'],
                                  self.transform_dict['spatial']['scale_fit_prob_thresh_sp'],
@@ -201,10 +201,8 @@ class Dataset(object):
         #ipdb.set_trace()
         for k,v in trial_dict.items():
             
-            rand_int_sp=random.sample(0,1)
-            
-            if v[0]==True and rand_int_sp>v[1]:
-                select_trans.append(v[2])
+            if v[0]==True:
+                select_trans.append((v[1],v[2]))
             else:
                 continue
         
