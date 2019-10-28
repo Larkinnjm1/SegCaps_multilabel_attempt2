@@ -35,6 +35,9 @@ class MainLoop(MainLoopBase):
         self.cls_wghts=param['class_weights_arr']
         self.disp_iter = 100
         self.data_aug=param['data_aug']
+        self.patience=param['patience']#Patience for running of analysis
+        self.dice_score_earlystop=param['earlystop_sp']
+        self.agg_dice_score=None#Additional aggregate dice score added to mitigate against overfitting when data augmentation is introduced. 
         self.snapshot_iter = self.test_iter
         self.test_initialization = False
         self.current_iter = 0
@@ -121,7 +124,7 @@ class MainLoop(MainLoopBase):
         self.train_losses = OrderedDict([('loss', self.loss_net)])
 
         # solver
-        self.optimizer = tf.train.AdadeltaOptimizer(learning_rate=1).minimize(self.loss, global_step=global_step,var_list= tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='training'))
+        self.optimizer = tf.train.AdadeltaOptimizer(learning_rate=self.learning_rates).minimize(self.loss, global_step=global_step,var_list= tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='training'))
 
         # build val graph
         val_placeholders = tensorflow_train.utils.tensorflow_util.create_placeholders(data_generator_entries, shape_prefix=[1])
@@ -182,6 +185,18 @@ class MainLoop(MainLoopBase):
         # finalize loss values
         segmentation_statistics.finalize()
         dice_list = segmentation_statistics.get_metric_mean_list('dice')
+        #Additional logic added to trip dice score based on early stopping criteria to prevent overfitting. 
+        if self.agg_dice_score is None:
+            self.agg_dice_score=np.array(dice_list)
+        else:
+            dice_score_trip=sum(np.subtract(self.agg_dice_score,np.array(dice_list)))
+            print('Dice score trip value:',dice_score_trip)
+            if dice_score_trip<=self.dice_score_earlystop and self.current_iter>=self.patience:
+                print('Initiating early stopping dice score tripped:',dice_score_trip)
+                self.current_iter=self.max_iter+1
+            else:
+                self.agg_dice_score=np.mean([self.agg_dice_score,np.array(dice_list)],axis=0)
+        
         dice_dict = OrderedDict(list(zip(self.dice_names, dice_list)))
         self.val_loss_aggregator.finalize(self.current_iter, summary_values=dice_dict)
 
@@ -190,12 +205,70 @@ if __name__ == '__main__':
     #parameter=[[spread_loss,Matwo_CapsNet,'dual']]
     #parameter=[[spread_loss,MatVec_CapsNet,'dynamic']]
     #parameter=[[spread_loss,MatVec_CapsNet,'dual']]
-    parameter=[{'loss_function':weighted_softmax,'network':SegCaps_multilabels,
-                'routing_type':'','batch_size':1,'max_iter':5000,
-                'test_iter':250,'data_aug':False,'num_labels':5,'learning_rates':[1,1],
+    parameter=[{'loss_function':weighted_spread_loss,'network':SegCaps_multilabels,
+                'routing_type':'','batch_size':1,'max_iter':7500,
+                'test_iter':250,'data_aug':True,
+                'num_labels':5,'learning_rates':0.0003,
+                'data_format':'channels_first',
+                'save_debug_images':False,'image_size':[256,256], #5000,0.001
+                'aug_dict_path':'./aug_dict_dual.json','patience':249,'earlystop_sp':0.5,
+                'class_weights_arr':np.array([0.03987201, 0.36867433, 0.35872208, 0.2314718 , 0.00125978])},
+{'loss_function':weighted_spread_loss,'network':SegCaps_multilabels,
+            'routing_type':'','batch_size':1,'max_iter':7500,
+            'test_iter':250,'data_aug':True,
+            'num_labels':5,'learning_rates':0.001,
+            'data_format':'channels_first',
+            'save_debug_images':False,'image_size':[256,256],
+            'aug_dict_path':'./aug_dict_dual.json','patience':5000,'earlystop_sp':0.001,
+            'class_weights_arr':np.array([0.03987201, 0.36867433, 0.35872208, 0.2314718 , 0.00125978])},
+ {'loss_function':weighted_spread_loss,'network':SegCaps_multilabels,
+        'routing_type':'','batch_size':1,'max_iter':7500,
+        'test_iter':250,'data_aug':True,
+        'num_labels':5,'learning_rates':0.01,
+        'data_format':'channels_first',
+        'save_debug_images':False,'image_size':[256,256],
+        'aug_dict_path':'./aug_dict_dual.json','patience':5000,'earlystop_sp':0.001,
+        'class_weights_arr':np.array([0.03987201, 0.36867433, 0.35872208, 0.2314718 , 0.00125978])},
+ {'loss_function':weighted_spread_loss,'network':SegCaps_multilabels,
+        'routing_type':'','batch_size':1,'max_iter':7500,
+        'test_iter':250,'data_aug':True,
+        'num_labels':5,'learning_rates':0.1,
+        'data_format':'channels_first',
+        'save_debug_images':False,'image_size':[256,256],
+        'aug_dict_path':'./aug_dict_dual.json','patience':5000,'earlystop_sp':0.001,
+        'class_weights_arr':np.array([0.03987201, 0.36867433, 0.35872208, 0.2314718 , 0.00125978])},
+{'loss_function':weighted_softmax,'network':SegCaps_multilabels,
+                'routing_type':'','batch_size':1,'max_iter':7500,
+                'test_iter':250,'data_aug':True,
+                'num_labels':5,'learning_rates':0.0003,
                 'data_format':'channels_first',
                 'save_debug_images':False,'image_size':[256,256],
-                'aug_dict_path':'./aug_dict_dual.json','class_weights_arr':np.array([0.03987201, 0.36867433, 0.35872208, 0.2314718 , 0.00125978])}]
+                'aug_dict_path':'./aug_dict_dual.json','patience':5000,'earlystop_sp':0.001,
+                'class_weights_arr':np.array([0.03987201, 0.36867433, 0.35872208, 0.2314718 , 0.00125978])},
+{'loss_function':weighted_softmax,'network':SegCaps_multilabels,
+            'routing_type':'','batch_size':1,'max_iter':7500,
+            'test_iter':250,'data_aug':True,
+            'num_labels':5,'learning_rates':0.001,
+            'data_format':'channels_first',
+            'save_debug_images':False,'image_size':[256,256],
+            'aug_dict_path':'./aug_dict_dual.json','patience':5000,'earlystop_sp':0.001,
+            'class_weights_arr':np.array([0.03987201, 0.36867433, 0.35872208, 0.2314718 , 0.00125978])},
+ {'loss_function':weighted_softmax,'network':SegCaps_multilabels,
+        'routing_type':'','batch_size':1,'max_iter':7500,
+        'test_iter':250,'data_aug':True,
+        'num_labels':5,'learning_rates':0.01,
+        'data_format':'channels_first',
+        'save_debug_images':False,'image_size':[256,256],
+        'aug_dict_path':'./aug_dict_dual.json','patience':5000,'earlystop_sp':0.001,
+        'class_weights_arr':np.array([0.03987201, 0.36867433, 0.35872208, 0.2314718 , 0.00125978])},
+ {'loss_function':weighted_softmax,'network':SegCaps_multilabels,
+        'routing_type':'','batch_size':1,'max_iter':7500,
+        'test_iter':250,'data_aug':True,
+        'num_labels':5,'learning_rates':0.1,
+        'data_format':'channels_first',
+        'save_debug_images':False,'image_size':[256,256],
+        'aug_dict_path':'./aug_dict_dual.json','patience':5000,'earlystop_sp':0.001,
+        'class_weights_arr':np.array([0.03987201, 0.36867433, 0.35872208, 0.2314718 , 0.00125978])}]
     #parameter=[[weighted_spread_loss,SegCaps_multilabels,'']]
     
     for param in parameter:

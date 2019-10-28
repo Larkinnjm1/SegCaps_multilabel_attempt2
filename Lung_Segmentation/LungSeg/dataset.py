@@ -147,6 +147,7 @@ class Dataset(object):
         """
         
         commands=self.mod_spat_aug()
+        print('Commands being utilised for analysis:',commands)
         
         return composite.Composite(self.dim,
                                    commands)
@@ -195,7 +196,7 @@ class Dataset(object):
                                                       self.image_size,
                                                       self.image_spacing)]} #
         
-        print('transformation being added to process')
+        
         select_trans=[]
         #ipdb.set_trace()
         for k,v in trial_dict.items():
