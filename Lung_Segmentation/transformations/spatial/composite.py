@@ -22,14 +22,14 @@ class Composite(SpatialTransformBase):
         :param kwargs: Optional parameters sent to the other transformations.
         :return: The composite sitk transform.
         """
-        print('Composite function being called for analysis')
+        ##p('Composite function being called for analysis')
         compos = sitk.Transform(self.dim, sitk.sitkIdentity)
         for i in range(len(self.transformations)):
             
-            rand_int_sp=random.sample(0,1)
+            rand_int_sp=random.uniform(0,1)
             
             if rand_int_sp>self.transformations[i][0]:
                 print('transformation added',self.transformations[i][1])
                 compos.AddTransform(self.transformations[i][1].get(**kwargs))
-        
+       
         return compos

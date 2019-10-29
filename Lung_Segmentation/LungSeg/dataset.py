@@ -160,7 +160,7 @@ class Dataset(object):
         """
         
         
-        trial_dict={'translation_input_centre':[self.transform_dict['spatial']['trans_input_centre_bool'],0.001
+        trial_dict={'translation_input_centre':[self.transform_dict['spatial']['trans_input_centre_bool'],0.001,
                                                 translation.InputCenterToOrigin(self.dim)],
                     'scale_fit':[self.transform_dict['spatial']['scale_fit_bool'],
                                  self.transform_dict['spatial']['scale_fit_prob_thresh_sp'],
@@ -177,7 +177,7 @@ class Dataset(object):
                                                        self.transform_dict['spatial']['rotation_random_angle_arg'])],
                     'flip_random':[self.transform_dict['spatial']['flip_rand_bool'],
                                    self.transform_dict['spatial']['flip_rand_prob_thresh_sp'],
-                                   self.flip.Random(self.dim,
+                                   flip.Random(self.dim,
                                                     self.transform_dict['spatial']['flip_random_scaling_parameter'])],
                     'scale_random_uniform':[self.transform_dict['spatial']['rand_scal_uni_bool'],
                                             self.transform_dict['spatial']['rand_scal_prob_thresh'],
@@ -216,9 +216,9 @@ class Dataset(object):
         :return: The transformation.
         """
         return composite.Composite(self.dim,
-                                   [translation.InputCenterToOrigin(self.dim),
-                                    scale.Fit(self.dim,self.image_size, self.image_spacing),
-                                    translation.OriginToOutputCenter(self.dim, self.image_size, self.image_spacing)]
+                                   [(0,translation.InputCenterToOrigin(self.dim)),
+                                    (0,scale.Fit(self.dim,self.image_size, self.image_spacing)),
+                                    (0,translation.OriginToOutputCenter(self.dim, self.image_size, self.image_spacing))]
                                    )
 
     def dataset_train(self):
