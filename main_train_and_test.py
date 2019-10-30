@@ -27,7 +27,8 @@ class MainLoop(MainLoopBase):
         self.loss_function=param['loss_function']#usually param[0]
         self.network=param['network']#Usually param[1]
         self.routing_type=param['routing_type'] #usually param[2]
-
+        self.output_folder=param['output_folder']
+        self.current_iter=param['current_iter']
         self.batch_size = param['batch_size'] #abritrary value is 1
         self.learning_rates = param['learning_rates'] #arbitrary value is [1,1]
         self.max_iter = param['max_iter']#arbitrary is 300000
@@ -37,6 +38,7 @@ class MainLoop(MainLoopBase):
         self.data_aug=param['data_aug']
         self.patience=param['patience']#Patience for running of analysis
         self.dice_score_earlystop=param['earlystop_sp']
+        
         self.agg_dice_score=None#Additional aggregate dice score added to mitigate against overfitting when data augmentation is introduced. 
         self.snapshot_iter = self.test_iter
         self.test_initialization = False
@@ -206,70 +208,7 @@ if __name__ == '__main__':
     #parameter=[[spread_loss,Matwo_CapsNet,'dual']]
     #parameter=[[spread_loss,MatVec_CapsNet,'dynamic']]
     #parameter=[[spread_loss,MatVec_CapsNet,'dual']]
-    parameter=[{'loss_function':weighted_spread_loss,'network':SegCaps_multilabels,
-                'routing_type':'','batch_size':1,'max_iter':7500,
-                'test_iter':250,'data_aug':True, #250
-                'num_labels':5,'learning_rates':0.0003,
-                'data_format':'channels_first',
-                'save_debug_images':False,'image_size':[256,256], #5000,0.001
-                'aug_dict_path':'./aug_dict_prob.json','patience':5000,'earlystop_sp':0.001,
-                'class_weights_arr':np.array([0.03987201, 0.36867433, 0.35872208, 0.2314718 , 0.00125978])},
-{'loss_function':weighted_spread_loss,'network':SegCaps_multilabels,
-            'routing_type':'','batch_size':1,'max_iter':7500,
-            'test_iter':250,'data_aug':True,
-            'num_labels':5,'learning_rates':0.001,
-            'data_format':'channels_first',
-            'save_debug_images':False,'image_size':[256,256],
-            'aug_dict_path':'./aug_dict_prob.json','patience':5000,'earlystop_sp':0.001,
-            'class_weights_arr':np.array([0.03987201, 0.36867433, 0.35872208, 0.2314718 , 0.00125978])},
- {'loss_function':weighted_spread_loss,'network':SegCaps_multilabels,
-        'routing_type':'','batch_size':1,'max_iter':7500,
-        'test_iter':250,'data_aug':True,
-        'num_labels':5,'learning_rates':0.01,
-        'data_format':'channels_first',
-        'save_debug_images':False,'image_size':[256,256],
-        'aug_dict_path':'./aug_dict_prob.json','patience':5000,'earlystop_sp':0.001,
-        'class_weights_arr':np.array([0.03987201, 0.36867433, 0.35872208, 0.2314718 , 0.00125978])},
- {'loss_function':weighted_spread_loss,'network':SegCaps_multilabels,
-        'routing_type':'','batch_size':1,'max_iter':7500,
-        'test_iter':250,'data_aug':True,
-        'num_labels':5,'learning_rates':0.1,
-        'data_format':'channels_first',
-        'save_debug_images':False,'image_size':[256,256],
-        'aug_dict_path':'./aug_dict_prob.json','patience':5000,'earlystop_sp':0.001,
-        'class_weights_arr':np.array([0.03987201, 0.36867433, 0.35872208, 0.2314718 , 0.00125978])},
-{'loss_function':weighted_softmax,'network':SegCaps_multilabels,
-                'routing_type':'','batch_size':1,'max_iter':7500,
-                'test_iter':250,'data_aug':True,
-                'num_labels':5,'learning_rates':0.0003,
-                'data_format':'channels_first',
-                'save_debug_images':False,'image_size':[256,256],
-                'aug_dict_path':'./aug_dict_prob.json','patience':5000,'earlystop_sp':0.001,
-                'class_weights_arr':np.array([0.03987201, 0.36867433, 0.35872208, 0.2314718 , 0.00125978])},
-{'loss_function':weighted_softmax,'network':SegCaps_multilabels,
-            'routing_type':'','batch_size':1,'max_iter':7500,
-            'test_iter':250,'data_aug':True,
-            'num_labels':5,'learning_rates':0.001,
-            'data_format':'channels_first',
-            'save_debug_images':False,'image_size':[256,256],
-            'aug_dict_path':'./aug_dict_prob.json','patience':5000,'earlystop_sp':0.001,
-            'class_weights_arr':np.array([0.03987201, 0.36867433, 0.35872208, 0.2314718 , 0.00125978])},
- {'loss_function':weighted_softmax,'network':SegCaps_multilabels,
-        'routing_type':'','batch_size':1,'max_iter':7500,
-        'test_iter':250,'data_aug':True,
-        'num_labels':5,'learning_rates':0.01,
-        'data_format':'channels_first',
-        'save_debug_images':False,'image_size':[256,256],
-        'aug_dict_path':'./aug_dict_prob.json','patience':5000,'earlystop_sp':0.001,
-        'class_weights_arr':np.array([0.03987201, 0.36867433, 0.35872208, 0.2314718 , 0.00125978])},
- {'loss_function':weighted_softmax,'network':SegCaps_multilabels,
-        'routing_type':'','batch_size':1,'max_iter':7500,
-        'test_iter':250,'data_aug':True,
-        'num_labels':5,'learning_rates':0.1,
-        'data_format':'channels_first',
-        'save_debug_images':False,'image_size':[256,256],
-        'aug_dict_path':'./aug_dict_prob.json','patience':5000,'earlystop_sp':0.001,
-        'class_weights_arr':np.array([0.03987201, 0.36867433, 0.35872208, 0.2314718 , 0.00125978])}]
+
     #parameter=[[weighted_spread_loss,SegCaps_multilabels,'']]
     
     for param in parameter[5:]:
