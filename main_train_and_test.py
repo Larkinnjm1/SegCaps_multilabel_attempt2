@@ -7,7 +7,7 @@ import numpy as np
 import json
 import tensorflow_train.utils.tensorflow_util
 from tensorflow_train.data_generator import DataGenerator
-from tensorflow_train.losses.semantic_segmentation_losses import softmax, weighted_softmax, spread_loss, weighted_spread_loss
+from tensorflow_train.losses.semantic_segmentation_losses import softmax, weighted_softmax, spread_loss, weighted_spread_loss,focal_loss_fixed
 from tensorflow_train.train_loop import MainLoopBase
 from tensorflow_train.utils.summary_handler import SummaryHandler, create_summary_placeholder
 from utils.segmentation.segmentation_test import SegmentationTest
@@ -27,7 +27,7 @@ class MainLoop(MainLoopBase):
         self.loss_function=param['loss_function']#usually param[0]
         self.network=param['network']#Usually param[1]
         self.routing_type=param['routing_type'] #usually param[2]
-        self.output_folder=param['output_folder']
+        #self.output_folder=param['output_folder']
         self.current_iter=param['current_iter']
         self.batch_size = param['batch_size'] #abritrary value is 1
         self.learning_rates = param['learning_rates'] #arbitrary value is [1,1]
@@ -211,6 +211,56 @@ if __name__ == '__main__':
 
     #parameter=[[weighted_spread_loss,SegCaps_multilabels,'']]
     
-    for param in parameter[5:]:
+    grid_search_parameter=[{'loss_function':focal_loss_fixed,'network':SegCaps_multilabels,'model_file_path':'',
+                'routing_type':'','batch_size':1,'max_iter':7500,
+                'test_iter':250,'data_aug':True, #250
+                'num_labels':5,'learning_rates':0.5,
+                'data_format':'channels_first',
+                'save_debug_images':False,'image_size':[256,256], #5000,0.001
+                'aug_dict_path':'./aug_dict_prob.json','patience':5000,'earlystop_sp':0.001,
+                'class_weights_arr':np.array([0.03987201, 0.36867433, 0.35872208, 0.2314718 , 0.00125978])},
+{'loss_function':focal_loss_fixed,'network':SegCaps_multilabels,'model_file_path':'',
+                'routing_type':'','batch_size':1,'max_iter':7500,
+                'test_iter':250,'data_aug':True, #250
+                'num_labels':5,'learning_rates':0.9,
+                'data_format':'channels_first',
+                'save_debug_images':False,'image_size':[256,256], #5000,0.001
+                'aug_dict_path':'./aug_dict_prob.json','patience':5000,'earlystop_sp':0.001,
+                'class_weights_arr':np.array([0.03987201, 0.36867433, 0.35872208, 0.2314718 , 0.00125978])},
+{'loss_function':focal_loss_fixed,'network':SegCaps_multilabels,'model_file_path':'',
+                'routing_type':'','batch_size':1,'max_iter':7500,
+                'test_iter':250,'data_aug':True, #250
+                'num_labels':5,'learning_rates':0.0003,
+                'data_format':'channels_first',
+                'save_debug_images':False,'image_size':[256,256], #5000,0.001
+                'aug_dict_path':'./aug_dict_prob.json','patience':5000,'earlystop_sp':0.001,
+                'class_weights_arr':np.array([0.03987201, 0.36867433, 0.35872208, 0.2314718 , 0.00125978])},
+{'loss_function':focal_loss_fixed,'network':SegCaps_multilabels,'model_file_path':'',
+            'routing_type':'','batch_size':1,'max_iter':7500,
+            'test_iter':250,'data_aug':True,
+            'num_labels':5,'learning_rates':0.001,
+            'data_format':'channels_first',
+            'save_debug_images':False,'image_size':[256,256],
+            'aug_dict_path':'./aug_dict_prob.json','patience':5000,'earlystop_sp':0.001,
+            'class_weights_arr':np.array([0.03987201, 0.36867433, 0.35872208, 0.2314718 , 0.00125978])},
+ {'loss_function':focal_loss_fixed,'network':SegCaps_multilabels,'model_file_path':'',
+        'routing_type':'','batch_size':1,'max_iter':7500,
+        'test_iter':250,'data_aug':True,
+        'num_labels':5,'learning_rates':0.01,
+        'data_format':'channels_first',
+        'save_debug_images':False,'image_size':[256,256],
+        'aug_dict_path':'./aug_dict_prob.json','patience':5000,'earlystop_sp':0.001,
+        'class_weights_arr':np.array([0.03987201, 0.36867433, 0.35872208, 0.2314718 , 0.00125978])},
+ {'loss_function':focal_loss_fixed,'network':SegCaps_multilabels,'model_file_path':'',
+        'routing_type':'','batch_size':1,'max_iter':7500,
+        'test_iter':250,'data_aug':True,
+        'num_labels':5,'learning_rates':0.1,
+        'data_format':'channels_first',
+        'save_debug_images':False,'image_size':[256,256],
+        'aug_dict_path':'./aug_dict_prob.json','patience':5000,'earlystop_sp':0.001,
+        'class_weights_arr':np.array([0.03987201, 0.36867433, 0.35872208, 0.2314718 , 0.00125978])}]
+    
+    
+    for param in grid_search_parameter:
             loop = MainLoop(param)
             loop.run()
