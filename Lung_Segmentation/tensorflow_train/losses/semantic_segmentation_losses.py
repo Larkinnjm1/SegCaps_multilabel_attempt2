@@ -62,7 +62,7 @@ def weighted_softmax(labels, logits, data_format='channels_first',
   loss=tf.reduce_sum(tf.stack(loss,axis=0),axis=0)
   return tf.reduce_mean(loss)
 
-def focal_loss_fixed(y_true,logits,gamma=2., alpha=4.,data_format='channels_first'):
+def focal_loss_fixed(labels,logits,gamma=2., alpha=4.,data_format='channels_first'):
     """Focal loss for multi-classification
     FL(p_t)=-alpha(1-p_t)^{gamma}ln(p_t)
     Notice: y_pred is probability after softmax
@@ -85,7 +85,7 @@ def focal_loss_fixed(y_true,logits,gamma=2., alpha=4.,data_format='channels_firs
     NB for this class the funciton will be of the shape batch size, num cls, height,width as these are images
         
     """
-    
+    y_true=labels
     channel_index = get_channel_index(y_true, data_format)
     
     y_pred=tf.nn.softmax(logits,axis=channel_index)

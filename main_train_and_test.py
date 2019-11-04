@@ -28,7 +28,7 @@ class MainLoop(MainLoopBase):
         self.network=param['network']#Usually param[1]
         self.routing_type=param['routing_type'] #usually param[2]
         #self.output_folder=param['output_folder']
-        self.current_iter=param['current_iter']
+        self.current_iter=0#param['current_iter']
         self.batch_size = param['batch_size'] #abritrary value is 1
         self.learning_rates = param['learning_rates'] #arbitrary value is [1,1]
         self.max_iter = param['max_iter']#arbitrary is 300000
