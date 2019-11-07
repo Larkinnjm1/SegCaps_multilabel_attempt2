@@ -27,8 +27,7 @@ class MainLoop(MainLoopBase):
         self.loss_function=param['loss_function']#usually param[0]
         self.network=param['network']#Usually param[1]
         self.routing_type=param['routing_type'] #usually param[2]
-        #self.output_folder=param['output_folder']
-        self.current_iter=0#param['current_iter']
+        #
         self.batch_size = param['batch_size'] #abritrary value is 1
         self.learning_rates = param['learning_rates'] #arbitrary value is [1,1]
         self.max_iter = param['max_iter']#arbitrary is 300000
@@ -50,7 +49,14 @@ class MainLoop(MainLoopBase):
         self.base_folder = "./Dataset/"
         self.image_size = param['image_size']#[128, 128] 
         self.image_spacing = [1, 1]
-        self.output_folder = './Experiments/' + self.network.__name__ + '_' + self.output_folder_timestamp()
+        
+        if param['output_folder'] is None:
+            self.output_folder = './Experiments/' + self.network.__name__ + '_' + self.output_folder_timestamp()
+            self.current_iter=0
+        else:
+            self.output_folder='./Experiments/' +param['output_folder']
+            self.current_iter=param['current_iter']
+            
         #Opening augmentation dictionary for analysis
         with open(param['aug_dict_path'],'r') as fb:
             self.aug_dict=json.load(fb)
@@ -212,45 +218,15 @@ if __name__ == '__main__':
     #parameter=[[weighted_spread_loss,SegCaps_multilabels,'']]
     
     grid_search_parameter=[{'loss_function':weighted_softmax,'network':SegCaps_multilabels,'model_file_path':'',
-            'routing_type':'','batch_size':1,'max_iter':7500,
+            'routing_type':'','batch_size':1,'max_iter':20000,
             'test_iter':250,'data_aug':True,
             'num_labels':5,'learning_rates':0.5,
             'data_format':'channels_first',
             'save_debug_images':False,'image_size':[256,256],
-            'aug_dict_path':'./aug_dict_prob.json','patience':5000,'earlystop_sp':0.001,
-            'class_weights_arr':np.array([1,31.64997857, 292.64977218, 284.74978171,183.73985934])},
-        {'loss_function':weighted_softmax,'network':SegCaps_multilabels,'model_file_path':'',
-            'routing_type':'','batch_size':1,'max_iter':7500,
-            'test_iter':250,'data_aug':True,
-            'num_labels':5,'learning_rates':0.0003,
-            'data_format':'channels_first',
-            'save_debug_images':False,'image_size':[256,256],
-            'aug_dict_path':'./aug_dict_prob.json','patience':5000,'earlystop_sp':0.001,
-            'class_weights_arr':np.array([1,31.64997857, 292.64977218, 284.74978171,183.73985934])},
-     {'loss_function':weighted_softmax,'network':SegCaps_multilabels,'model_file_path':'',
-            'routing_type':'','batch_size':1,'max_iter':7500,
-            'test_iter':250,'data_aug':True,
-            'num_labels':5,'learning_rates':0.9,
-            'data_format':'channels_first',
-            'save_debug_images':False,'image_size':[256,256],
-            'aug_dict_path':'./aug_dict_prob.json','patience':5000,'earlystop_sp':0.001,
-            'class_weights_arr':np.array([1,31.64997857, 292.64977218, 284.74978171,183.73985934])},
-      {'loss_function':weighted_spread_loss,'network':SegCaps_multilabels,'model_file_path':'',
-            'routing_type':'','batch_size':1,'max_iter':7500,
-            'test_iter':250,'data_aug':True,
-            'num_labels':5,'learning_rates':0.5,
-            'data_format':'channels_first',
-            'save_debug_images':False,'image_size':[256,256],
-            'aug_dict_path':'./aug_dict_prob.json','patience':5000,'earlystop_sp':0.001,
-            'class_weights_arr':np.array([1,31.64997857, 292.64977218, 284.74978171,183.73985934])},
-     {'loss_function':weighted_spread_loss,'network':SegCaps_multilabels,'model_file_path':'',
-            'routing_type':'','batch_size':1,'max_iter':7500,
-            'test_iter':250,'data_aug':True,
-            'num_labels':5,'learning_rates':0.9,
-            'data_format':'channels_first',
-            'save_debug_images':False,'image_size':[256,256],
-            'aug_dict_path':'./aug_dict_prob.json','patience':5000,'earlystop_sp':0.001,
-            'class_weights_arr':np.array([1,31.64997857, 292.64977218, 284.74978171,183.73985934])}]
+            'aug_dict_path':'./aug_dict_prob.json','patience':12500,'earlystop_sp':0.0001,
+            'class_weights_arr':np.array([1,31.64997857, 292.64977218, 284.74978171,183.73985934]),
+            'output_folder':'SegCaps_multilabels_2019-11-07_00-15-18',
+            'current_iter':5000}]
     
     
     for param in grid_search_parameter:

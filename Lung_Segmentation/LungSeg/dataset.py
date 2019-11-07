@@ -3,7 +3,8 @@ import sys
 import numpy as np
 import SimpleITK as sitk
 import ipdb
-sys.path.append(r"C:\Users\niall\SegCaps_multilabel_attempt2\Lung_Segmentation")
+#sys.path.append(r"C:\Users\niall\SegCaps_multilabel_attempt2\Lung_Segmentation")
+sys.path.append(r"\\nsq024vs\u8\aczd087\MyDocs\SegCaps_multilabel_attempt2\Lung_Segmentation")
 from datasets.reference_image_transformation_dataset import ReferenceTransformationDataset
 from datasources.cached_image_datasource import CachedImageDataSource
 from generators.image_generator import ImageGenerator

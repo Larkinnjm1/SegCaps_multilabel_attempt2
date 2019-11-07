@@ -22,7 +22,38 @@ trian_further_parameter=[{'loss_function':weighted_spread_loss,'network':SegCaps
             'class_weights_arr':np.array([0.03987201, 0.36867433, 0.35872208, 0.2314718 , 0.00125978])}]
 
 
-
+[{'loss_function':weighted_softmax,'network':SegCaps_multilabels,'model_file_path':'',
+            'routing_type':'','batch_size':1,'max_iter':7500,
+            'test_iter':250,'data_aug':True,
+            'num_labels':5,'learning_rates':0.0003,
+            'data_format':'channels_first',
+            'save_debug_images':False,'image_size':[256,256],
+            'aug_dict_path':'./aug_dict_prob.json','patience':5000,'earlystop_sp':0.001,
+            'class_weights_arr':np.array([1,31.64997857, 292.64977218, 284.74978171,183.73985934])},
+     {'loss_function':weighted_softmax,'network':SegCaps_multilabels,'model_file_path':'',
+            'routing_type':'','batch_size':1,'max_iter':7500,
+            'test_iter':250,'data_aug':True,
+            'num_labels':5,'learning_rates':0.9,
+            'data_format':'channels_first',
+            'save_debug_images':False,'image_size':[256,256],
+            'aug_dict_path':'./aug_dict_prob.json','patience':5000,'earlystop_sp':0.001,
+            'class_weights_arr':np.array([1,31.64997857, 292.64977218, 284.74978171,183.73985934])},
+      {'loss_function':weighted_spread_loss,'network':SegCaps_multilabels,'model_file_path':'',
+            'routing_type':'','batch_size':1,'max_iter':7500,
+            'test_iter':250,'data_aug':True,
+            'num_labels':5,'learning_rates':0.5,
+            'data_format':'channels_first',
+            'save_debug_images':False,'image_size':[256,256],
+            'aug_dict_path':'./aug_dict_prob.json','patience':5000,'earlystop_sp':0.001,
+            'class_weights_arr':np.array([1,31.64997857, 292.64977218, 284.74978171,183.73985934])},
+     {'loss_function':weighted_spread_loss,'network':SegCaps_multilabels,'model_file_path':'',
+            'routing_type':'','batch_size':1,'max_iter':7500,
+            'test_iter':250,'data_aug':True,
+            'num_labels':5,'learning_rates':0.9,
+            'data_format':'channels_first',
+            'save_debug_images':False,'image_size':[256,256],
+            'aug_dict_path':'./aug_dict_prob.json','patience':5000,'earlystop_sp':0.001,
+            'class_weights_arr':np.array([1,31.64997857, 292.64977218, 284.74978171,183.73985934])}]
 
 
 
