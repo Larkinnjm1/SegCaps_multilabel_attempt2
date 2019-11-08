@@ -28,8 +28,8 @@ class Composite(SpatialTransformBase):
             
             rand_int_sp=random.uniform(0,1)
             
-            if rand_int_sp>self.transformations[i][0]:
-                print('transformation added',self.transformations[i][1])
+            if rand_int_sp>=self.transformations[i][0]:
+                #print('transformation added',self.transformations[i][1])
                 compos.AddTransform(self.transformations[i][1].get(**kwargs))
        
         return compos

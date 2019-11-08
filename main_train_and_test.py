@@ -129,7 +129,7 @@ class MainLoop(MainLoopBase):
         update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
         with tf.control_dependencies(update_ops):
                 self.loss = self.loss_net
-
+                print('training loss:',self.loss)
         self.train_losses = OrderedDict([('loss', self.loss_net)])
 
         # solver
@@ -150,6 +150,7 @@ class MainLoop(MainLoopBase):
             # losses
             self.loss_val = self.loss_function(labels=self.mask_val, logits=self.prediction_val, data_format=self.data_format)
             self.val_losses = OrderedDict([('loss', self.loss_val)])
+            print('validation loss:',self.loss_val)
 
 
     def test(self):
