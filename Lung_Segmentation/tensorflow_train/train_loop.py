@@ -169,9 +169,14 @@ class MainLoopBase(object):
 
         # run fetches
         results = self.sess.run(fetches)
-
+        
+        
+        print('training loss:',self.loss.eval(session=self.sess))
+        if self.train_loss_aggregator is not None:
+            print('train loss agg dict:',self.train_loss_aggregator.get_current_losses_dict())
         # display loss and save summary
         if self.train_loss_aggregator is not None and (self.current_iter % self.disp_iter) == 0:
+            print('train losses dict:',self.train_loss_aggregator.get_current_losses_dict())
             self.train_loss_aggregator.finalize(self.current_iter)
         # save layer_weight_summary
         if self.layer_weight_inspector is not None and (self.current_iter % self.layer_weight_summary_iter) == 0:

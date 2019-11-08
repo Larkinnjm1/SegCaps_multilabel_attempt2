@@ -150,7 +150,7 @@ class MainLoop(MainLoopBase):
             # losses
             self.loss_val = self.loss_function(labels=self.mask_val, logits=self.prediction_val, data_format=self.data_format)
             self.val_losses = OrderedDict([('loss', self.loss_val)])
-            print('validation loss:',self.loss_val)
+            
 
 
     def test(self):
@@ -180,7 +180,7 @@ class MainLoop(MainLoopBase):
                 # run loss and update loss accumulators
             run_tuple = self.sess.run((self.prediction_val, self.loss_val) + self.val_loss_aggregator.get_update_ops(),
                                           feed_dict=feed_dict)
-           
+            print('validation loss:',self.val_loss_aggregator.get_current_losses_dict())
             prediction = np.squeeze(run_tuple[0], axis=0)
             input = datasources['image']
             transformation = transformations['data']
@@ -220,10 +220,10 @@ if __name__ == '__main__':
     
     grid_search_parameter=[{'loss_function':weighted_softmax,'network':SegCaps_multilabels,'model_file_path':'',
             'routing_type':'','batch_size':1,'max_iter':20000,
-            'test_iter':250,'data_aug':True,
+            'test_iter':30,'data_aug':True,
             'num_labels':5,'learning_rates':0.5,
             'data_format':'channels_first',
-            'save_debug_images':False,'image_size':[256,256],
+            'save_debug_images':True,'image_size':[256,256],
             'aug_dict_path':'./aug_dict_prob.json','patience':12500,'earlystop_sp':0.0001,
             'class_weights_arr':np.array([1,31.64997857, 292.64977218, 284.74978171,183.73985934]),
             'output_folder':'SegCaps_multilabels_2019-11-07_00-15-18',
