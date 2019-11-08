@@ -96,7 +96,7 @@ class ReferenceTransformationDataset(BasicDataset):
         # update generators
         generated_values = {}
         transformations = {}
-        print('Key generator being activated for mask')
+        #print('Key generator being activated for mask')
         for key, data_generator in self.data_generators.items():
             kwarguments = dict([(key, datasource_values[value]) for key, value in self.data_generator_sources[key].items()])
             current_transformation = data_generator.get_transformation(base_transformation=base_transformation, **reference_datasource_dict)

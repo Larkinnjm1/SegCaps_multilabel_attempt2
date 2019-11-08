@@ -148,7 +148,23 @@ class MainLoop(MainLoopBase):
             self.mask_val = val_placeholders['mask'] 
 
             # losses
-            self.loss_val = self.loss_function(labels=self.mask_val, logits=self.prediction_val, data_format=self.data_format)
+            
+            
+            if 'weighted_spread_loss' in self.loss_function.__name__:
+                self.loss_val = self.loss_function(labels=mask_val, logits=prediction_val,
+                                       global_step=global_step,
+                                       data_format=self.data_format,w_l=self.cls_wghts)
+            elif 'weighted_softmax' in self.loss_function.__name__:
+                self.loss_val = self.loss_function(labels=mask_val, logits=prediction_val,
+                                                   data_format=self.data_format,w_l=self.cls_wghts)
+            
+            elif 'spread_loss' in self.loss_function.__name__ :
+                self.loss_val = self.loss_function(labels=mask_val, logits=prediction_val,
+                                                   global_step=global_step,data_format=self.data_format)
+            else:
+                self.loss_val = self.loss_function(labels=mask_val, logits=prediction_val, data_format=self.data_format)
+            
+            #self.loss_val = self.loss_function(labels=self.mask_val, logits=self.prediction_val, data_format=self.data_format)
             self.val_losses = OrderedDict([('loss', self.loss_val)])
             
 
