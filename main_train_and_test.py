@@ -1,6 +1,6 @@
 import sys
 sys.path.append("./Lung_Segmentation")
-
+import pickle
 from collections import OrderedDict
 import tensorflow as tf
 import numpy as np
@@ -14,11 +14,12 @@ from utils.segmentation.segmentation_test import SegmentationTest
 from utils.segmentation.segmentation_statistics import SegmentationStatistics
 from utils.segmentation.metrics import DiceMetric
 import utils.io.image
-
+#import ipdb
 from LungSeg.dataset import Dataset
 from LungSeg.cnn_network import network_ud
 from LungSeg.capsule_network import Matwo_CapsNet, MatVec_CapsNet
 from LungSeg.SegCaps.SegCaps import SegCaps_multilabels
+import os
 
 class MainLoop(MainLoopBase):
     def __init__(self, param):
@@ -151,18 +152,18 @@ class MainLoop(MainLoopBase):
             
             
             if 'weighted_spread_loss' in self.loss_function.__name__:
-                self.loss_val = self.loss_function(labels=mask_val, logits=prediction_val,
+                self.loss_val = self.loss_function(labels=self.mask_val, logits=self.prediction_val,
                                        global_step=global_step,
                                        data_format=self.data_format,w_l=self.cls_wghts)
             elif 'weighted_softmax' in self.loss_function.__name__:
-                self.loss_val = self.loss_function(labels=mask_val, logits=prediction_val,
+                self.loss_val = self.loss_function(labels=self.mask_val, logits=self.prediction_val,
                                                    data_format=self.data_format,w_l=self.cls_wghts)
             
-            elif 'spread_loss' in self.loss_function.__name__ :
-                self.loss_val = self.loss_function(labels=mask_val, logits=prediction_val,
+            elif 'spread_loss' in self.loss_function.__name__:
+                self.loss_val = self.loss_function(labels=self.mask_val, logits=self.prediction_val,
                                                    global_step=global_step,data_format=self.data_format)
             else:
-                self.loss_val = self.loss_function(labels=mask_val, logits=prediction_val, data_format=self.data_format)
+                self.loss_val = self.loss_function(labels=self.mask_val, logits=self.prediction_val, data_format=self.data_format)
             
             #self.loss_val = self.loss_function(labels=self.mask_val, logits=self.prediction_val, data_format=self.data_format)
             self.val_losses = OrderedDict([('loss', self.loss_val)])
@@ -196,7 +197,7 @@ class MainLoop(MainLoopBase):
                 # run loss and update loss accumulators
             run_tuple = self.sess.run((self.prediction_val, self.loss_val) + self.val_loss_aggregator.get_update_ops(),
                                           feed_dict=feed_dict)
-            print('validation loss:',self.val_loss_aggregator.get_current_losses_dict())
+            #print('validation loss:',self.val_loss_aggregator.get_current_losses_dict())
             prediction = np.squeeze(run_tuple[0], axis=0)
             input = datasources['image']
             transformation = transformations['data']
@@ -234,18 +235,36 @@ if __name__ == '__main__':
 
     #parameter=[[weighted_spread_loss,SegCaps_multilabels,'']]
     
-    grid_search_parameter=[{'loss_function':weighted_softmax,'network':SegCaps_multilabels,'model_file_path':'',
-            'routing_type':'','batch_size':1,'max_iter':20000,
-            'test_iter':30,'data_aug':True,
-            'num_labels':5,'learning_rates':0.5,
-            'data_format':'channels_first',
-            'save_debug_images':True,'image_size':[256,256],
-            'aug_dict_path':'./aug_dict_prob.json','patience':12500,'earlystop_sp':0.0001,
-            'class_weights_arr':np.array([1,31.64997857, 292.64977218, 284.74978171,183.73985934]),
-            'output_folder':'SegCaps_multilabels_2019-11-07_00-15-18',
-            'current_iter':5000}]
+    #grid_search_parameter=[{'loss_function':weighted_softmax,'network':SegCaps_multilabels,'model_file_path':'',
+     #       'routing_type':'','batch_size':1,'max_iter':90000,
+      #      'test_iter':250,'data_aug':True,
+       #     'num_labels':5,'learning_rates':0.01,
+        #    'data_format':'channels_first',
+         #   'save_debug_images':False,'image_size':[256,256],
+          #  'aug_dict_path':'./aug_dict_prob.json','patience':90000,'earlystop_sp':0.0001,
+           # 'class_weights_arr':np.array([1,31.64997857, 292.64977218, 284.74978171,183.73985934]),
+           # 'output_folder':'SegCaps_multilabels_2019-11-09_01-25-53',
+           # 'current_iter':82000}]
+    with open('parameter_rerun_segcaps_14_nov_19_mk2.pickle','rb') as fb:
+        grid_search_parameter=pickle.load(fb)
     
+    #ipdb.set_trace()
+    
+    loss_func_dict={'weighted_spread_loss':weighted_spread_loss,
+                    'weighted_softmax':weighted_softmax,
+                    'generalised_dice_loss':generalised_dice_loss,
+                    'focal_loss_fixed':focal_loss_fixed}
     
     for param in grid_search_parameter:
-            loop = MainLoop(param)
-            loop.run()
+            param['loss_function']=loss_func_dict[param['loss_function']]
+            param['network']=SegCaps_multilabels
+            param['max_iter']=12500
+            param['patience']=12500
+            param['current_iter']=5000 
+            tmp_dir='./Experiments/'+param['output_folder']+'/weights'
+            
+            if os.path.isdir(tmp_dir):
+                loop = MainLoop(param)
+                loop.run()
+            else:
+                print('Weights not found')
