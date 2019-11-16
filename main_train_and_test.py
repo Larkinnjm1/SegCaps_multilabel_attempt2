@@ -258,13 +258,19 @@ if __name__ == '__main__':
     for param in grid_search_parameter:
             param['loss_function']=loss_func_dict[param['loss_function']]
             param['network']=SegCaps_multilabels
-            param['max_iter']=12500
-            param['patience']=12500
-            param['current_iter']=5000 
+            max_iter=param['max_iter']
+            test_range=list(range(250,max_iter,250))
+             
             tmp_dir='./Experiments/'+param['output_folder']+'/weights'
             
             if os.path.isdir(tmp_dir):
-                loop = MainLoop(param)
-                loop.run()
+                
+                #Iterating through each test set
+                for vals in test_range:
+                    
+                    param['current_iter']=vals
+                    loop = MainLoop(param)
+                
+                    loop.runtest()
             else:
                 print('Weights not found')
