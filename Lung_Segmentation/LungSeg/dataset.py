@@ -31,7 +31,8 @@ class Dataset(object):
                  input_gaussian_sigma=1.0,
                  label_gaussian_sigma=1.0,
                  data_format='channels_first',
-                 save_debug_images=False):
+                 save_debug_images=False,
+                 test_file_path=None):
         """
         Initializer.
         :param image_size: Network input image size.
@@ -59,7 +60,10 @@ class Dataset(object):
         self.postprocessing_random = self.intensity_postprocessing_mr_random
         self.postprocessing = self.intensity_postprocessing_mr
         self.train_file = os.path.join(self.setup_base_folder,'fold1.txt')
-        self.test_file = os.path.join(self.setup_base_folder,'fold2.txt')
+        if test_file_path is None:
+            self.test_file = os.path.join(self.setup_base_folder,'fold2.txt')
+        else:
+            self.test_file=os.path.join(self.setup_base_folder,test_file_path)
 
     def datasources(self):
         """

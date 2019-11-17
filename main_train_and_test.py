@@ -38,7 +38,8 @@ class MainLoop(MainLoopBase):
         self.data_aug=param['data_aug']
         self.patience=param['patience']#Patience for running of analysis
         self.dice_score_earlystop=param['earlystop_sp']
-        
+        self.test_file_paths_bool=param['test_file_path_bool']
+        self.test_file_paths=param['test_file_paths']
         self.agg_dice_score=None#Additional aggregate dice score added to mitigate against overfitting when data augmentation is introduced. 
         self.snapshot_iter = self.test_iter
         self.test_initialization = False
@@ -70,7 +71,8 @@ class MainLoop(MainLoopBase):
                                data_format = self.data_format,
                                save_debug_images = self.save_debug_images,
                                data_aug=self.data_aug,
-                               transform_dict=self.aug_dict)
+                               transform_dict=self.aug_dict,
+                               test_file_path=self.test_file_path)
 
         self.dataset_train = self.dataset.dataset_train()
         self.dataset_train.get_next()
@@ -170,7 +172,7 @@ class MainLoop(MainLoopBase):
             
 
 
-    def test(self):
+    def test(self,fold_txt_str=None):
         print('Testing...')
         channel_axis = 0
         if self.data_format == 'channels_last':
@@ -181,8 +183,11 @@ class MainLoop(MainLoopBase):
                                              interpolator='cubic',
                                              largest_connected_component=False,
                                              all_labels_are_connected=False)
+        
+        if 
+        
         segmentation_statistics = SegmentationStatistics(labels,
-                                                         self.output_folder_for_current_iteration(),
+                                                         self.output_folder_for_current_iteration(fold_txt_str),
                                                          metrics={'dice': DiceMetric()})
         num_entries = self.dataset_val.num_entries()
         for i in range(num_entries):
@@ -202,8 +207,10 @@ class MainLoop(MainLoopBase):
             input = datasources['image']
             transformation = transformations['data']
             prediction_labels, prediction_sitk = segmentation_test.get_label_image(prediction, input, self.image_spacing, transformation, return_transformed_sitk=True)
-            utils.io.image.write_np_colormask(prediction_labels, self.output_file_for_current_iteration(current_id + '.png'))
-            utils.io.image.write_np(prediction, self.output_file_for_current_iteration(current_id + '_prediction.mha'))
+            utils.io.image.write_np_colormask(prediction_labels, self.output_file_for_current_iteration(current_id + '.png',
+                                                                                                        fold_txt_str))
+            utils.io.image.write_np(prediction, self.output_file_for_current_iteration(current_id + '_prediction.mha',
+                                                                                       fold_txt_str))
 
             groundtruth = datasources['mask']
             segmentation_statistics.add_labels(current_id, prediction_labels, groundtruth)
@@ -226,6 +233,82 @@ class MainLoop(MainLoopBase):
         
         dice_dict = OrderedDict(list(zip(self.dice_names, dice_list)))
         self.val_loss_aggregator.finalize(self.current_iter, summary_values=dice_dict)
+        
+        def initLossAggregators(self,spec_out_str=None):
+            if self.train_losses is not None and self.val_losses is not None:
+                assert set(self.train_losses.keys()) == set(self.val_losses.keys()), 'train and val loss keys are not equal'
+    
+            if self.train_losses is None:
+                return
+    
+            summaries_placeholders = OrderedDict([(loss_name, create_summary_placeholder(loss_name)) for loss_name in self.train_losses.keys()])
+            if spec_out_str is None:
+                spec_str_val='test'
+            else:
+                spec_str_val=spec_out_str+'_'+'test'
+            
+            # mean values used for summaries
+            self.train_loss_aggregator = SummaryHandler(self.sess,
+                                                        self.train_losses,
+                                                        summaries_placeholders,
+                                                        'train',
+                                                        os.path.join(self.output_folder, 'train'),
+                                                        os.path.join(self.output_folder, 'train.csv', ))
+    
+            if self.val_losses is None:
+                return
+    
+            summaries_placeholders_val = summaries_placeholders.copy()
+    
+            if self.additional_summaries_placeholders_val is not None:
+                summaries_placeholders_val.update(self.additional_summaries_placeholders_val)
+    
+            self.val_loss_aggregator = SummaryHandler(self.sess,
+                                                      self.val_losses,
+                                                      summaries_placeholders_val,
+                                                      spec_str_val,
+                                                      os.path.join(self.output_folder,spec_str_val),
+                                                      os.path.join(self.output_folder,spec_str_val+'.csv'))
+        
+    def run_test(self):
+        """Run test for analysis"""
+        
+        test_range=list(range(250,self.max_iter,250))
+        print('Starting main test loop')
+        try:
+            if self.test_file_paths_bool==True:
+                
+                self.initNetworks()
+                self.init_variables()
+                self.start_threads()
+                self.init_saver()
+                self.create_output_folder()
+                self.write_param()
+                
+                for iters_set in test_range:
+                    self.current_iter=iters_set
+                    self.load_model()
+                    
+                    for paths in self.test_file_paths:
+                        self.dataset = Dataset(image_size = self.image_size,
+                                   image_spacing = self.image_spacing,
+                                   num_labels = self.num_labels,
+                                   base_folder = self.base_folder,
+                                   data_format = self.data_format,
+                                   save_debug_images = self.save_debug_images,
+                                   data_aug=self.data_aug,
+                                   transform_dict=self.aug_dict,
+                                   test_file_path=paths)
+                        #Reinitialise dataset information                 
+                        self.dataset_train = self.dataset.dataset_train()
+                        self.dataset_train.get_next()
+                        self.dataset_val = self.dataset.dataset_val()
+                        
+                        #Setting initial loss aggregators for analysis 
+                        self.initLossAggregators()
+                        self.test()
+        finally:
+            self.close()
 
 if __name__ == '__main__':
     #parameter=[[softmax,network_ud,'']]
@@ -258,8 +341,7 @@ if __name__ == '__main__':
     for param in grid_search_parameter:
             param['loss_function']=loss_func_dict[param['loss_function']]
             param['network']=SegCaps_multilabels
-            max_iter=param['max_iter']
-            test_range=list(range(250,max_iter,250))
+            
              
             tmp_dir='./Experiments/'+param['output_folder']+'/weights'
             
