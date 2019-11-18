@@ -39,7 +39,7 @@ class MainLoop(MainLoopBase):
         self.patience=param['patience']#Patience for running of analysis
         self.dice_score_earlystop=param['earlystop_sp']
         self.test_file_paths_bool=param['test_file_path_bool']
-        self.test_file_paths=param['test_file_paths']
+        self.test_file_paths='fold1.txt'
         self.agg_dice_score=None#Additional aggregate dice score added to mitigate against overfitting when data augmentation is introduced. 
         self.snapshot_iter = self.test_iter
         self.test_initialization = False
@@ -232,42 +232,42 @@ class MainLoop(MainLoopBase):
         dice_dict = OrderedDict(list(zip(self.dice_names, dice_list)))
         self.val_loss_aggregator.finalize(self.current_iter, summary_values=dice_dict)
         
-        def initLossAggregators(self,spec_out_str=None):
-            if self.train_losses is not None and self.val_losses is not None:
-                assert set(self.train_losses.keys()) == set(self.val_losses.keys()), 'train and val loss keys are not equal'
-    
-            if self.train_losses is None:
-                return
-    
-            summaries_placeholders = OrderedDict([(loss_name, create_summary_placeholder(loss_name)) for loss_name in self.train_losses.keys()])
-            #Change out of string values for analysis if method is regular non regular testing. 
-            if spec_out_str is None:
-                spec_str_val='test'
-            else:
-                spec_str_val=spec_out_str+'_'+'test'
-            
-            # mean values used for summaries
-            self.train_loss_aggregator = SummaryHandler(self.sess,
-                                                        self.train_losses,
-                                                        summaries_placeholders,
-                                                        'train',
-                                                        os.path.join(self.output_folder, 'train'),
-                                                        os.path.join(self.output_folder, 'train.csv', ))
-    
-            if self.val_losses is None:
-                return
-    
-            summaries_placeholders_val = summaries_placeholders.copy()
-    
-            if self.additional_summaries_placeholders_val is not None:
-                summaries_placeholders_val.update(self.additional_summaries_placeholders_val)
-    
-            self.val_loss_aggregator = SummaryHandler(self.sess,
-                                                      self.val_losses,
-                                                      summaries_placeholders_val,
-                                                      spec_str_val,
-                                                      os.path.join(self.output_folder,spec_str_val),
-                                                      os.path.join(self.output_folder,spec_str_val+'.csv'))
+    def initLossAggregators(self,spec_out_str=None):
+        if self.train_losses is not None and self.val_losses is not None:
+            assert set(self.train_losses.keys()) == set(self.val_losses.keys()), 'train and val loss keys are not equal'
+
+        if self.train_losses is None:
+            return
+
+        summaries_placeholders = OrderedDict([(loss_name, create_summary_placeholder(loss_name)) for loss_name in self.train_losses.keys()])
+        #Change out of string values for analysis if method is regular non regular testing. 
+        if spec_out_str is None:
+            spec_str_val='test'
+        else:
+            spec_str_val=spec_out_str+'_'+'test'
+        
+        # mean values used for summaries
+        self.train_loss_aggregator = SummaryHandler(self.sess,
+                                                    self.train_losses,
+                                                    summaries_placeholders,
+                                                    'train',
+                                                    os.path.join(self.output_folder, 'train'),
+                                                    os.path.join(self.output_folder, 'train.csv', ))
+
+        if self.val_losses is None:
+            return
+
+        summaries_placeholders_val = summaries_placeholders.copy()
+
+        if self.additional_summaries_placeholders_val is not None:
+            summaries_placeholders_val.update(self.additional_summaries_placeholders_val)
+
+        self.val_loss_aggregator = SummaryHandler(self.sess,
+                                                  self.val_losses,
+                                                  summaries_placeholders_val,
+                                                  spec_str_val,
+                                                  os.path.join(self.output_folder,spec_str_val),
+                                                  os.path.join(self.output_folder,spec_str_val+'.csv'))
         
     def run_test(self):
         """Run test for analysis"""
@@ -288,7 +288,7 @@ class MainLoop(MainLoopBase):
                     self.current_iter=iters_set
                     self.load_model()
                     
-                    for paths in self.test_file_paths:
+                    for paths in param['test_file_paths']:
                         #Loading dataset based on setup file path
                         self.dataset = Dataset(image_size = self.image_size,
                                    image_spacing = self.image_spacing,
@@ -305,7 +305,7 @@ class MainLoop(MainLoopBase):
                         self.dataset_val = self.dataset.dataset_val()
                         
                         #Setting initial loss aggregators for analysis 
-                        file_pt_str='_'+os.splitext(os.path.basename(paths))[0]
+                        file_pt_str='_'+os.path.splitext(os.path.basename(paths))[0]
                         
                         self.initLossAggregators(file_pt_str)
                         self.test(file_pt_str)
@@ -351,6 +351,6 @@ if __name__ == '__main__':
                 #Iterating through each test set
                 loop = MainLoop(param)
             
-                loop.runtest()
+                loop.run_test()
             else:
                 print('Weights not found')
