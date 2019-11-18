@@ -184,8 +184,6 @@ class MainLoop(MainLoopBase):
                                              largest_connected_component=False,
                                              all_labels_are_connected=False)
         
-        if 
-        
         segmentation_statistics = SegmentationStatistics(labels,
                                                          self.output_folder_for_current_iteration(fold_txt_str),
                                                          metrics={'dice': DiceMetric()})
@@ -242,6 +240,7 @@ class MainLoop(MainLoopBase):
                 return
     
             summaries_placeholders = OrderedDict([(loss_name, create_summary_placeholder(loss_name)) for loss_name in self.train_losses.keys()])
+            #Change out of string values for analysis if method is regular non regular testing. 
             if spec_out_str is None:
                 spec_str_val='test'
             else:
@@ -290,6 +289,7 @@ class MainLoop(MainLoopBase):
                     self.load_model()
                     
                     for paths in self.test_file_paths:
+                        #Loading dataset based on setup file path
                         self.dataset = Dataset(image_size = self.image_size,
                                    image_spacing = self.image_spacing,
                                    num_labels = self.num_labels,
@@ -305,8 +305,10 @@ class MainLoop(MainLoopBase):
                         self.dataset_val = self.dataset.dataset_val()
                         
                         #Setting initial loss aggregators for analysis 
-                        self.initLossAggregators()
-                        self.test()
+                        file_pt_str='_'+os.splitext(os.path.basename(paths))[0]
+                        
+                        self.initLossAggregators(file_pt_str)
+                        self.test(file_pt_str)
         finally:
             self.close()
 
@@ -341,18 +343,14 @@ if __name__ == '__main__':
     for param in grid_search_parameter:
             param['loss_function']=loss_func_dict[param['loss_function']]
             param['network']=SegCaps_multilabels
-            
-             
+            param['test_file_path_bool']=True
+            param['test_file_paths']=['fold1.txt','fold2.txt','test.txt']
             tmp_dir='./Experiments/'+param['output_folder']+'/weights'
             
             if os.path.isdir(tmp_dir):
-                
                 #Iterating through each test set
-                for vals in test_range:
-                    
-                    param['current_iter']=vals
-                    loop = MainLoop(param)
-                
-                    loop.runtest()
+                loop = MainLoop(param)
+            
+                loop.runtest()
             else:
                 print('Weights not found')
