@@ -172,7 +172,7 @@ class MainLoop(MainLoopBase):
             
 
 
-    def test(self,fold_txt_str=None):
+    def test(self):
         print('Testing...')
         channel_axis = 0
         if self.data_format == 'channels_last':
@@ -185,7 +185,7 @@ class MainLoop(MainLoopBase):
                                              all_labels_are_connected=False)
         
         segmentation_statistics = SegmentationStatistics(labels,
-                                                         self.output_folder_for_current_iteration(fold_txt_str),
+                                                         self.output_folder_for_current_iteration(),
                                                          metrics={'dice': DiceMetric()})
         num_entries = self.dataset_val.num_entries()
         for i in range(num_entries):
@@ -205,10 +205,8 @@ class MainLoop(MainLoopBase):
             input = datasources['image']
             transformation = transformations['data']
             prediction_labels, prediction_sitk = segmentation_test.get_label_image(prediction, input, self.image_spacing, transformation, return_transformed_sitk=True)
-            utils.io.image.write_np_colormask(prediction_labels, self.output_file_for_current_iteration(current_id + '.png',
-                                                                                                        fold_txt_str))
-            utils.io.image.write_np(prediction, self.output_file_for_current_iteration(current_id + '_prediction.mha',
-                                                                                       fold_txt_str))
+            utils.io.image.write_np_colormask(prediction_labels, self.output_file_for_current_iteration(current_id + '.png'))
+            utils.io.image.write_np(prediction, self.output_file_for_current_iteration(current_id + '_prediction.mha'))
 
             groundtruth = datasources['mask']
             segmentation_statistics.add_labels(current_id, prediction_labels, groundtruth)
@@ -232,42 +230,6 @@ class MainLoop(MainLoopBase):
         dice_dict = OrderedDict(list(zip(self.dice_names, dice_list)))
         self.val_loss_aggregator.finalize(self.current_iter, summary_values=dice_dict)
         
-    def initLossAggregators(self,spec_out_str=None):
-        if self.train_losses is not None and self.val_losses is not None:
-            assert set(self.train_losses.keys()) == set(self.val_losses.keys()), 'train and val loss keys are not equal'
-
-        if self.train_losses is None:
-            return
-
-        summaries_placeholders = OrderedDict([(loss_name, create_summary_placeholder(loss_name)) for loss_name in self.train_losses.keys()])
-        #Change out of string values for analysis if method is regular non regular testing. 
-        if spec_out_str is None:
-            spec_str_val='test'
-        else:
-            spec_str_val=spec_out_str+'_'+'test'
-        
-        # mean values used for summaries
-        self.train_loss_aggregator = SummaryHandler(self.sess,
-                                                    self.train_losses,
-                                                    summaries_placeholders,
-                                                    'train',
-                                                    os.path.join(self.output_folder, 'train'),
-                                                    os.path.join(self.output_folder, 'train.csv', ))
-
-        if self.val_losses is None:
-            return
-
-        summaries_placeholders_val = summaries_placeholders.copy()
-
-        if self.additional_summaries_placeholders_val is not None:
-            summaries_placeholders_val.update(self.additional_summaries_placeholders_val)
-
-        self.val_loss_aggregator = SummaryHandler(self.sess,
-                                                  self.val_losses,
-                                                  summaries_placeholders_val,
-                                                  spec_str_val,
-                                                  os.path.join(self.output_folder,spec_str_val),
-                                                  os.path.join(self.output_folder,spec_str_val+'.csv'))
         
     def run_test(self):
         """Run test for analysis"""
@@ -278,6 +240,7 @@ class MainLoop(MainLoopBase):
             if self.test_file_paths_bool==True:
                 
                 self.initNetworks()
+                self.initLossAggregators()
                 self.init_variables()
                 self.start_threads()
                 self.init_saver()
@@ -288,27 +251,25 @@ class MainLoop(MainLoopBase):
                     self.current_iter=iters_set
                     self.load_model()
                     
-                    for paths in param['test_file_paths']:
+                    
                         #Loading dataset based on setup file path
-                        self.dataset = Dataset(image_size = self.image_size,
-                                   image_spacing = self.image_spacing,
-                                   num_labels = self.num_labels,
-                                   base_folder = self.base_folder,
-                                   data_format = self.data_format,
-                                   save_debug_images = self.save_debug_images,
-                                   data_aug=self.data_aug,
-                                   transform_dict=self.aug_dict,
-                                   test_file_path=paths)
+                    self.dataset = Dataset(image_size = self.image_size,
+                               image_spacing = self.image_spacing,
+                               num_labels = self.num_labels,
+                               base_folder = self.base_folder,
+                               data_format = self.data_format,
+                               save_debug_images = self.save_debug_images,
+                               data_aug=self.data_aug,
+                               transform_dict=self.aug_dict,
+                               test_file_path=param['test_file_paths'])
                         #Reinitialise dataset information                 
-                        self.dataset_train = self.dataset.dataset_train()
-                        self.dataset_train.get_next()
-                        self.dataset_val = self.dataset.dataset_val()
+                    self.dataset_train = self.dataset.dataset_train()
+                    self.dataset_train.get_next()
+                    self.dataset_val = self.dataset.dataset_val()
                         
-                        #Setting initial loss aggregators for analysis 
-                        file_pt_str='_'+os.path.splitext(os.path.basename(paths))[0]
-                        
-                        self.initLossAggregators(file_pt_str)
-                        self.test(file_pt_str)
+                    #Setting initial loss aggregators for analysis 
+                    
+                    self.test()
         finally:
             self.close()
 
@@ -344,7 +305,7 @@ if __name__ == '__main__':
             param['loss_function']=loss_func_dict[param['loss_function']]
             param['network']=SegCaps_multilabels
             param['test_file_path_bool']=True
-            param['test_file_paths']=['fold1.txt','fold2.txt','test.txt']
+            param['test_file_paths']='fold3.txt'
             tmp_dir='./Experiments/'+param['output_folder']+'/weights'
             
             if os.path.isdir(tmp_dir):

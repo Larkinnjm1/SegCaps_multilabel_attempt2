@@ -101,17 +101,13 @@ class MainLoopBase(object):
     def output_folder_timestamp(self):
         return datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 
-    def output_folder_for_current_iteration(self,str_chr_add=None):
-        if str_chr_add is None:
-            return os.path.join(self.output_folder, 'iter_' + str(self.current_iter))
-        else:
-            return os.path.join(self.output_folder, 'iter_' + str(self.current_iter)+'_'+str_chr_add)
+    def output_folder_for_current_iteration(self):
+        
+        return os.path.join(self.output_folder, 'iter_' + str(self.current_iter))
+        
+    def output_file_for_current_iteration(self, file_name):
+        return os.path.join(self.output_folder, 'iter_' + str(self.current_iter),file_name)
 
-    def output_file_for_current_iteration(self, file_name,str_chr_add=None):
-        if str_chr_add is None:
-            return os.path.join(self.output_folder, 'iter_' + str(self.current_iter),file_name)
-        else:
-            return os.path.join(self.output_folder, 'iter_' + str(self.current_iter)+'_'+str_chr_add, file_name)
 
     def write_param(self):
             #load param
