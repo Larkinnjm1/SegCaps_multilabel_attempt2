@@ -14,12 +14,14 @@ from utils.segmentation.segmentation_test import SegmentationTest
 from utils.segmentation.segmentation_statistics import SegmentationStatistics
 from utils.segmentation.metrics import DiceMetric
 import utils.io.image
-#import ipdb
+import ipdb
 from LungSeg.dataset import Dataset
 from LungSeg.cnn_network import network_ud
 from LungSeg.capsule_network import Matwo_CapsNet, MatVec_CapsNet
 from LungSeg.SegCaps.SegCaps import SegCaps_multilabels
 import os
+import subprocess
+import re
 
 class MainLoop(MainLoopBase):
     def __init__(self, param):
@@ -234,8 +236,8 @@ class MainLoop(MainLoopBase):
     def run_test(self):
         """Run test for analysis"""
         if param['output_folder']!='SegCaps_multilabels_2019-11-02_20-19-45':
-            test_range=list(range(750,self.max_iter,750))
-            test_range=[250]+test_range+[12500]
+            test_range=list(range(4500,self.max_iter,750))
+            test_range=test_range+[self.max_iter]
         else:
             test_range=list(range(6750,self.max_iter,750))
             test_range=test_range+[12500]
@@ -292,7 +294,7 @@ if __name__ == '__main__':
            # 'class_weights_arr':np.array([1,31.64997857, 292.64977218, 284.74978171,183.73985934]),
            # 'output_folder':'SegCaps_multilabels_2019-11-09_01-25-53',
            # 'current_iter':82000}]
-    with open('parameter_rerun_segcaps_14_nov_19_mk2.pickle','rb') as fb:
+    with open('parameter_rerun_segcaps_19_nov_19_mk3.pickle','rb') as fb:
         grid_search_parameter=pickle.load(fb)
     
     #ipdb.set_trace()
@@ -302,21 +304,35 @@ if __name__ == '__main__':
                     'generalised_dice_loss':generalised_dice_loss,
                     'focal_loss_fixed':focal_loss_fixed}
     
+    with open('./param_for_analysis/final_list_for_pred_models_images','rb') as fb:
+        file_dict=pickle.load(fb)
+    
+    file_vals=list(file_dict.keys())
+     
     for param in grid_search_parameter:
             param['loss_function']=loss_func_dict[param['loss_function']]
             param['network']=SegCaps_multilabels
-            param['current_iter']=7500
-            param['max_iter']=12500
-            param['patience']=12500
-            param['test_file_path_bool']=False
-            param['test_file_paths']=None#'fold3.txt'
+            param['current_iter']=250
+            param['test_file_path_bool']=True
+            param['test_file_paths']='fold3.txt'
             tmp_dir='./Experiments/'+param['output_folder']+'/weights'
-
- 
-            if os.path.isdir(tmp_dir):#and param['output_folder'] in lock_lst:
-                #Iterating through each test set
+            print(file_vals[:4])
+            #ipdb.set_trace()
+            if os.path.isdir(tmp_dir) and param['output_folder'] in [file_vals[3]]:
+             #Getting maximum weights avialbell for testing
+                var_ls_wghts=subprocess.check_output('ls '+tmp_dir,shell=True).decode(sys.stderr.encoding).split('\n')
+                trl_lst_wghts=[re.findall('\d+',x) for x in var_ls_wghts]
+                concat_list_wghts = [j for i in trl_lst_wghts for j in i]
+                concat_list_int=[int(x) for x in concat_list_wghts]
+               # ipdb.set_trace()
+                max_iter_val= max(concat_list_int)
+                param['max_iter']=max_iter_val
+                param['current_iter']=4500
+                param['patience']=max_iter_val
+             
+               #Iterating through each test set
                 loop = MainLoop(param)
             
-                loop.run()
+                loop.run_test()
             else:
                 print('Weights not found')

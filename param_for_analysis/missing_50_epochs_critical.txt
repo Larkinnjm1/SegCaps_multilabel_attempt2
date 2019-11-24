@@ -1,0 +1,5 @@
+s3://results-models-history/results-segcaps/grid_search/categorical_focal_loss/SegCaps_multilabels_2019-11-02_16-25-11/
+s3://results-models-history/results-segcaps/grid_search/weighted_spread_loss/cls_wght_greater_than_1/SegCaps_multilabels_2019-11-07_06-15-20/
+s3://results-models-history/results-segcaps/grid_search/weighted_spread_loss/cls_wght_greater_than_1/SegCaps_multilabels_2019-11-07_08-20-44/
+s3://results-models-history/results-segcaps/grid_search/weighted_spread_loss/incorrect_cls_wght_dist/SegCaps_multilabels_2019-10-28_16-42-40/
+s3://results-models-history/results-segcaps/grid_search/weighted_spread_loss/incorrect_cls_wght_dist/SegCaps_multilabels_2019-10-28_22-39-23/
