@@ -31,7 +31,7 @@ def Main(args):
 def write_file_output(df_reform,args):
     
     """Write final file converted to file"""
-    fl_nm=os.splitext(os.path.basename(args.input_file))
+    fl_nm=os.path.splitext(os.path.basename(args.input_file))[0]
     
     df_reform.to_csv(os.path.join(args.output_file,fl_nm+'_df.csv'))
     
