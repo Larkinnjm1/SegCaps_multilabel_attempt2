@@ -8,7 +8,7 @@ Created on Wed Dec  4 21:02:20 2019
 import argparse
 import pandas as pd 
 import os 
-
+import pickle
 
 def parse_args():
     parser=argparse.ArgumentParser()
@@ -20,7 +20,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def Main():
+def Main(args):
     
     dict_fl=read_file_pickle(args)
     
@@ -65,4 +65,7 @@ def rewrite_df(trl_dict):
     
 if __name__=='__main__':
     
+    args=parse_args()
+    
+    Main(args)
     
