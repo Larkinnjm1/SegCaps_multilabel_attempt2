@@ -1,0 +1,13 @@
+final_lst=[]
+    ...: for epch_no,epch_data in trl_dict.items():
+    ...:     if isinstance(epch_data,dict):
+    ...:         for cap_lyr,cap_data in epch_data.items():
+    ...:             if isinstance(cap_data,dict):
+    ...:
+    ...:                 for per_cap_no,per_cap_data in cap_data.items():
+    ...:                     tmp_dict={}
+    ...:                     tmp_dict['cap_no']=per_cap_no
+    ...:                     tmp_dict.update(per_cap_data)
+    ...:                     tmp_dict['layer_name']=cap_lyr
+    ...:                     tmp_dict['epoch_no']=epch_no
+    ...:                     final_lst.append(tmp_dict)
