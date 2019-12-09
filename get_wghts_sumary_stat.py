@@ -107,7 +107,7 @@ def gen_weight_file(tmp_epoch_dict,w_b_dict,args):
     for epch_no in list(tmp_epoch_dict.keys()):
         #Retained as separate variable to keep memory space down duyring processing so dictoinary files can be deleted. 
         cap_net_layer_info=tmp_epoch_dict[epch_no]
-        i=0
+        
         for cap_layer in list(cap_net_layer_info.keys()):
             #resolved for dictionary deletion during procesing. 
             cap_array=cap_net_layer_info[cap_layer]
@@ -140,7 +140,7 @@ def gen_weight_file(tmp_epoch_dict,w_b_dict,args):
                 del cap_net_layer_info[cap_layer]
                 del summ_dict[epch_no][cap_layer]
                 #Determine if bias channel or weight channel being assessed
-                               #Getting summary info  based on channel information
+                #Getting summary info  based on channel information
                 stat_dict=per_caps_stat(cap_net_layer_info[tmp_lyr_nm],
                                         chnl_det,no_capsules)
                 #Assigning summary information to file
@@ -148,7 +148,7 @@ def gen_weight_file(tmp_epoch_dict,w_b_dict,args):
                 if tmp_lyr_nm not in summ_dict[epch_no].keys():
                     summ_dict[epch_no][tmp_lyr_nm]=stat_dict
                 else:
-                    i+=1
+                    
                     tmp_lyr_nm_pl=tmp_lyr_nm+str(i)
                     summ_dict[epch_no][tmp_lyr_nm_pl]=stat_dict
                 
@@ -164,14 +164,18 @@ def write_to_output(exp_nm,parse_args,**kwargs):
     #ipdb.set_trace()
     for f_nms,val in kwargs.items():
         tmp_path=os.path.join(parse_args.output_dir,exp_nm+'_'+f_nms)
-        
-        with open(tmp_path,'wb') as fb:
-            pickle.dump(val,fb)
-    
+        if f_nms=='reshape':
+            continue
+        try:
+            with open(tmp_path,'wb') as fb:
+                pickle.dump(val,fb)
+        except MemoryError as e:
+            print('unable to save due to lack of memory',e)
+            print('file_name:',f_nms)  
     
 def det_bias_wght_lyr(cap_layer,args,
-                      sub_str_dict={'capsule_bias_channel':['bconv','bdeconv','bprimary'],
-                                    'capsule_wght_channel':['wconv','wdeconv','wprimary']}):
+                      sub_str_dict={'capsule_bias_channel':['bconv','bdeconv','bprimary','wseg_caps'],
+                                    'capsule_wght_channel':['wconv','wdeconv','wprimary','bseg_caps']}):
     """The purpose of this method is to determine if a layer is bias or weight layer based on its name"""            
     #ipdb.set_trace()
     args_dict=vars(args)
@@ -182,7 +186,7 @@ def det_bias_wght_lyr(cap_layer,args,
         if len(tmp_lst)>0:
             ret_val=args_dict[k]
             break
-        
+ 
     return k,ret_val
 
     
@@ -212,10 +216,20 @@ def per_caps_stat(tmp_arr,chnl_det,no_caps):
             
         
 def get_layr_shp(cap_layer,w_b_dict):
-    #finds capsule layer via string matching of subtring filenames. 
-    
-    return [(k,w_b_dict[k]) for k,v in w_b_dict.items() if cap_layer.lower().find(k.lower())!=-1]
-    
+    #finds capsule layer via string matching of subtring filenames.     
+    tuple_set=[(k,w_b_dict[k]) for k,v in w_b_dict.items() if cap_layer.lower().find(k.lower())!=-1]
+    #ipdb.set_trace()
+    if len(tuple_set)>0:
+        f_nm_type,tpl_shp=tuple_set[0]
+        #Renaming ifile wrt to being adadelta or convolution step 
+        adadelta_sub=['adadelta_1','adadelta']
+        adadelta_val=[x for x in adadelta_sub if cap_layer.lower().find(x)!=-1]
+
+        if len(adadelta_val)>0:
+            f_nm_type=f_nm_type+'_'+max(adadelta_val,key=len)
+        tuple_set=[(f_nm_type,tpl_shp)]
+        
+    return tuple_set
     
     
        
