@@ -2,7 +2,7 @@
 import tensorflow as tf
 from tensorflow_train.layers.layers import  caps_length, caps_duallength, caps2d_matwo, primary_caps2d_matwo
 from tensorflow_train.layers.initializers import he_initializer
-
+import ipdb
 
 def Matwo_CapsNet(input, num_labels, is_training,  routing_type, routing=3, data_format='channels_last'):
 
@@ -17,7 +17,7 @@ def Matwo_CapsNet(input, num_labels, is_training,  routing_type, routing=3, data
     return prediction
 
 def MatVec_CapsNet(input, num_labels, is_training,  routing_type, routing=3, data_format='channels_last'):
-
+    ipdb.set_trace()
     padding = 'SAME'
     coord_add = True
     routing = 3

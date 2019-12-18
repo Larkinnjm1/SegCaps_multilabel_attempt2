@@ -14,12 +14,13 @@ from utils.segmentation.segmentation_test import SegmentationTest
 from utils.segmentation.segmentation_statistics import SegmentationStatistics
 from utils.segmentation.metrics import DiceMetric
 import utils.io.image
-#import ipdb
+import ipdb
 from LungSeg.dataset import Dataset
 from LungSeg.cnn_network import network_ud
 from LungSeg.capsule_network import Matwo_CapsNet, MatVec_CapsNet
 from LungSeg.SegCaps.SegCaps import SegCaps_multilabels
 import os
+import logging
 
 class MainLoop(MainLoopBase):
     def __init__(self, param):
@@ -43,18 +44,18 @@ class MainLoop(MainLoopBase):
         self.agg_dice_score=None#Additional aggregate dice score added to mitigate against overfitting when data augmentation is introduced. 
         self.snapshot_iter = self.test_iter
         self.test_initialization = False
-        self.current_iter = 0
+        self.current_iter = param['current_iter']
         self.num_labels = param['num_labels']#6
         self.data_format = param['data_format']#usually 'channels_first' #WARNING: Capsule might not work with channel last ! 
         self.channel_axis = 1
-        self.save_debug_images = param['save_debug_images']
-        self.base_folder = "./Dataset/"
+        self.save_debug_images =False
+        self.base_folder =param['base_folder']
         self.image_size = param['image_size']#[128, 128] 
         self.image_spacing = [1, 1]
         
         if param['output_folder'] is None:
             self.output_folder = './Experiments/' + self.network.__name__ + '_' + self.output_folder_timestamp()
-            self.current_iter=0
+            #self.current_iter=0
         else:
             self.output_folder='./Experiments/' +param['output_folder']
             self.current_iter=param['current_iter']
@@ -63,7 +64,7 @@ class MainLoop(MainLoopBase):
         with open(param['aug_dict_path'],'r') as fb:
             self.aug_dict=json.load(fb)
         
-        
+        #ipdb.set_trace()
         self.dataset = Dataset(image_size = self.image_size,
                                image_spacing = self.image_spacing,
                                num_labels = self.num_labels,
@@ -79,7 +80,7 @@ class MainLoop(MainLoopBase):
         self.dataset_val = self.dataset.dataset_val()
         self.dice_names = list(map(lambda x: 'dice_{}'.format(x), range(self.num_labels)))
         self.additional_summaries_placeholders_val = dict([(name, create_summary_placeholder(name)) for name in self.dice_names])
-
+        #ipdb.set_trace()
         if self.network.__name__ is 'network_ud' :
             self.net_file = './Lung_Segmentation/LungSeg/cnn_network.py'
         elif self.network.__name__ is 'SegCaps_multilabels' :
@@ -89,7 +90,7 @@ class MainLoop(MainLoopBase):
         self.files_to_copy = ['main_train_and_test.py', self.net_file]
 
     def initNetworks(self):
-        network_image_size = list(reversed(self.image_size))
+        network_image_size =list(reversed(self.image_size))
         global_step = tf.Variable(self.current_iter)
 
         if self.data_format == 'channels_first':
@@ -136,7 +137,7 @@ class MainLoop(MainLoopBase):
         self.train_losses = OrderedDict([('loss', self.loss_net)])
 
         # solver
-        self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rates).minimize(self.loss, global_step=global_step,var_list= tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='training'))
+        self.optimizer = tf.train.AdadeltaOptimizer(learning_rate=self.learning_rates).minimize(self.loss, global_step=global_step,var_list= tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='training'))
 
         # build val graph
         val_placeholders = tensorflow_train.utils.tensorflow_util.create_placeholders(data_generator_entries, shape_prefix=[1])
@@ -282,41 +283,50 @@ if __name__ == '__main__':
 
     #parameter=[[weighted_spread_loss,SegCaps_multilabels,'']]
     
-    #grid_search_parameter=[{'loss_function':weighted_softmax,'network':SegCaps_multilabels,'model_file_path':'',
-     #       'routing_type':'','batch_size':1,'max_iter':90000,
-      #      'test_iter':250,'data_aug':True,
-       #     'num_labels':5,'learning_rates':0.01,
-        #    'data_format':'channels_first',
-         #   'save_debug_images':False,'image_size':[256,256],
-          #  'aug_dict_path':'./aug_dict_prob.json','patience':90000,'earlystop_sp':0.0001,
-           # 'class_weights_arr':np.array([1,31.64997857, 292.64977218, 284.74978171,183.73985934]),
-           # 'output_folder':'SegCaps_multilabels_2019-11-09_01-25-53',
-           # 'current_iter':82000}]
-    with open('parameter_rerun_segcaps_14_nov_19_mk2.pickle','rb') as fb:
-        grid_search_parameter=pickle.load(fb)
-    
-    #ipdb.set_trace()
-    
-    loss_func_dict={'weighted_spread_loss':weighted_spread_loss,
-                    'weighted_softmax':weighted_softmax,
-                    'generalised_dice_loss':generalised_dice_loss,
-                    'focal_loss_fixed':focal_loss_fixed}
-    
-    for param in grid_search_parameter:
-            param['loss_function']=loss_func_dict[param['loss_function']]
-            param['network']=SegCaps_multilabels
-            #param['current_iter']=7500
-            param['max_iter']=12500
-            param['patience']=12500
-            param['test_file_path_bool']=False
-            param['test_file_paths']=None#'fold3.txt'
-            tmp_dir='./Experiments/'+param['output_folder']+'/weights'
+    param={'loss_function':weighted_softmax,'network':SegCaps_multilabels,'model_file_path':'',
+            'routing_type':'','batch_size':1,'max_iter':'N/A',
+            'test_iter':'','data_aug':True,
+            'num_labels':5,'learning_rates':0.1,
+            'data_format':'channels_first',
+            'save_debug_images':False,'image_size':[256,256],
+            'aug_dict_path':'./aug_dict_prob.json','patience':12500,'earlystop_sp':0.0001,
+            'class_weights_arr':np.array([1,31.64997857, 292.64977218, 284.74978171,183.73985934]),
+            'output_folder':None,
+            'current_iter':90000}
+    #Setting up to log errors 
+    logging.basicConfig(filename='/home/ec2-user/SegCaps_multilabel_attempt2/myapp.log', level=logging.DEBUG, 
+                    format='%(asctime)s %(levelname)s %(name)s %(message)s')
+    logger=logging.getLogger(__name__)
 
- 
-            if os.path.isdir(tmp_dir):#and param['output_folder'] in lock_lst:
-                #Iterating through each test set
-                loop = MainLoop(param)
-            
-                loop.run()
-            else:
-                print('Weights not found')
+    fls_lst=["./Dataset/250_imgs/"] # "./Dataset_resize/500_imgs/"
+    for idx,f_nm in enumerate(fls_lst):
+        if idx==0:
+            param['test_iter']=1
+            param['max_iter']=90001
+            param['patience']=90001 
+        elif idx==1:
+            param['test_iter']=636
+            param['max_iter']=20000
+            param['patience']=20000 
+        else:
+            param['test_iter']=200
+            param['max_iter']=5000
+            param['patience']=5000 
+        param['output_folder']='SegCaps_multilabels_2019-11-09_01-25-53'
+        #ipdb.set_trace()
+        param['base_folder']=f_nm
+        param['test_file_path_bool']=False
+        param['test_file_paths']='fold3.txt'
+    #tmp_dir='./Experiments/'+param['output_folder']+'/weights'
+                #ipdb.set_trace()
+    #if os.path.isdir(tmp_dir):#and param['output_folder'] in lock_lst:
+        #Iterating through each test set
+        try:
+
+            loop = MainLoop(param)
+    
+            loop.run()
+        except:
+            e = sys.exc_info()[0]
+            #Catching general info into logging file
+            logging.error('Error at %s', 'tf', exc_info=e)
