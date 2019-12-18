@@ -9,6 +9,7 @@ import tensorflow as tf
 from tensorflow.keras import initializers, layers
 from keras.utils.conv_utils import conv_output_length, deconv_length
 import numpy as np
+import sys
 
 class Length(layers.Layer):
     def __init__(self, num_classes, seg=True, **kwargs):
@@ -368,7 +369,18 @@ def update_routing(votes, biases, logit_shape, num_dims, input_dim, output_dim,
         tile_shape[1] = input_dim
         act_replicated = tf.tile(act_3d, tile_shape)
         distances = tf.reduce_sum(votes * act_replicated, axis=-1)
+        #Printing distance vector
+        #dist_print=tf.Print(dist_print, [distances])
+        
+        mean_logit, var_logit = tf.nn.moments(logits, axes=[-1])
+        tf.print("mean logit:", mean_logit, output_stream=sys.stdout)
+        tf.print("mean var_logit:", var_logit, output_stream=sys.stdout)
+        #dist_print=tf.Print(dist_print, [distances])
+        #dist_print=tf.Print(dist_print, [distances])
+        #tf.print("distance metric:", distances, output_stream=sys.stdout)
+
         logits += distances
+        
         return (i + 1, logits, activations)
 
     activations = tf.TensorArray(
@@ -381,7 +393,9 @@ def update_routing(votes, biases, logit_shape, num_dims, input_dim, output_dim,
       _body,
       loop_vars=[i, logits, activations],
       swap_memory=True)
-
+    
+    print_act=tf.Print(print_act, [activations])   
+    
     return K.cast(activations.read(num_routing - 1), dtype='float32')
 
 
