@@ -10,6 +10,7 @@ from tensorflow.keras import initializers, layers
 from keras.utils.conv_utils import conv_output_length, deconv_length
 import numpy as np
 import sys
+import ipdb
 
 class Length(layers.Layer):
     def __init__(self, num_classes, seg=True, **kwargs):
@@ -371,7 +372,6 @@ def update_routing(votes, biases, logit_shape, num_dims, input_dim, output_dim,
         distances = tf.reduce_sum(votes * act_replicated, axis=-1)
         #Printing distance vector
         #dist_print=tf.Print(dist_print, [distances])
-        
         mean_logit, var_logit = tf.nn.moments(logits, axes=[-1])
         tf.print("mean logit:", mean_logit, output_stream=sys.stdout)
         tf.print("mean var_logit:", var_logit, output_stream=sys.stdout)
@@ -387,15 +387,21 @@ def update_routing(votes, biases, logit_shape, num_dims, input_dim, output_dim,
       dtype=tf.float32, size=num_routing, clear_after_read=False)
     logits = tf.fill(logit_shape, 0.0)
 
+    ipdb.set_trace()    
     i = tf.constant(0, dtype=tf.int32)
     _, logits, activations = tf.while_loop(
       lambda i, logits, activations: i < num_routing,
       _body,
       loop_vars=[i, logits, activations],
       swap_memory=True)
-    
-    print_act=tf.Print(print_act, [activations])   
-    
+    #tmp_act_cst=tf.convert_to_tensor(activations,dtype=tf.TensorArray)    
+    tf.print('activations shape: ',activations.size)
+    tmp_act_cst=activations.concat()
+     
+    mean_act,var_act=tf.nn.moments(tmp_act_cst,axes=[-1])   
+    tf.print('mean activations',mean_act,output_stream=sys.stdout)
+    tf.print('variance in activation',var_act,output_stream=sys.stdout)
+
     return K.cast(activations.read(num_routing - 1), dtype='float32')
 
 

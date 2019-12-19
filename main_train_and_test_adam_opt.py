@@ -90,6 +90,7 @@ class MainLoop(MainLoopBase):
         self.files_to_copy = ['main_train_and_test.py', self.net_file]
 
     def initNetworks(self):
+        #tf.enable_eager_execution() 
         network_image_size =list(reversed(self.image_size))
         global_step = tf.Variable(self.current_iter)
 
@@ -302,8 +303,8 @@ if __name__ == '__main__':
     for idx,f_nm in enumerate(fls_lst):
         if idx==0:
             param['test_iter']=1
-            param['max_iter']=90001
-            param['patience']=90001 
+            param['max_iter']=90100
+            param['patience']=90100 
         elif idx==1:
             param['test_iter']=636
             param['max_iter']=20000
@@ -324,7 +325,6 @@ if __name__ == '__main__':
         try:
 
             loop = MainLoop(param)
-    
             loop.run()
         except:
             e = sys.exc_info()[0]
