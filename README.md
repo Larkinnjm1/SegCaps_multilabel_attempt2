@@ -1,35 +1,13 @@
-# Matwo-CapsNet
-Implementation of the MICCAI 2019 Paper "Matwo-CapsNet: a Multi-Label Semantic Segmentation Capsules Network". 
-
-
-## Matwo-Caps
-<img src="./Images/Matwo-Caps.png" width="450px"/>
-
-
-## SRC Multi-Label segmentation Dice score
-
-|      Method        | Parameters |        Loss          |  Left lung  | Right lung  | Left clavicule | Right clavicule | Heart | 
-|:------------------:|:----------:|:--------------------:|:-----------:|:-----------:|:--------------:|:---------------:|:-----:|
-|       U-Net        |    42K     |       Softmax        |  97.36      | 97.87       | 90.87          | 90.64           | 94.49 |
-|      SegCaps       |   2,129K   |   weighted Softmax   |  21.18      | 35.79       | 4.49           | 2.93            | 32.83 |
-|      SegCaps       |   2,129K   | weighted Spread loss |  30.74      | 0           | 0.06           | 0               | 23.23 |
-| MatVec-CapsNet O_r |    43K     |     Spread loss      |  95.57      | 96.43       | 82.89          | 82.56           | 92.37 |
-| MatVec-CapsNet D_r |    43K     |     Spread loss      |  96.60      | 97.15       | 86.41          | 86.38           | 93.42 |
-|    Matwo-CapsNet   |    43K     |     Spread loss      |  97.01      | 97.45       | 88.32          | 87.82           | 94.37 |
-
-## Architecture
-<img src="./Images/architecture.png" width="900px"/>
-
-## Dataset preprocessing
-Download the files from :
-
-- [JSRT dataset](http://db.jsrt.or.jp/eng.php)
-- [SRC dataset](https://www.isi.uu.nl/Research/Databases/SCR/download.php)
- 
-Extract the archives in `./Dataset` before running `./Dataset/dataset_preprocessing.py`
+# Introduction
+Capsule network initially forked and adapted from Matwo -Caps-net git
 
 ## Train models
-Run `main_train_and_test.py` to train the network. You can run any of the paper experiment by simply uncommenting the different settings at the end of the script.
+Run `main_train_and_test.py` to train the network. You can run the models by going into 'main_train_and_test.py' and uncommenting the associated dictionary parameters parameters at the bottom to get the apprpriate results. Please note that there is a augmentation json file "aug_dict_prob.json" which holds all the information pertaining how the augmentation parameters applied to each image. As a result this needs to be present in the same directory as main_train_and_test.py file. 
+
+## Evaluate models
+The following additional model scripts are used to assess and track the weights present in model. These scripts are the following and are ran in sequence:
+-'get_wghts_sumary_stat.py': Pulls and plots all the different capsules weight distribution for each layer and produces summary statistics on each one. 
+All other visualisation analysis performed with the SegCaps model was done using the testing suite present in the U-Net repository denoted as 'Masters-Thesis-UNet-repository' specific jupyter notebook Testing_dataset_unet.ipynb
 
 ## Train and test other datasets
 In order to train and test on other datasets, modify the `dataset.py` file. See the example files and documentation for the specific file formats. Set the parameter `save_debug_images = True` in order to see, if the network input images are reasonable.
