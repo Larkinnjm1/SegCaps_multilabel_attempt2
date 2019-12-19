@@ -275,23 +275,7 @@ class MainLoop(MainLoopBase):
             self.close()
 
 if __name__ == '__main__':
-    #parameter=[[softmax,network_ud,'']]
-    #parameter=[[spread_loss,Matwo_CapsNet,'dual']]
-    #parameter=[[spread_loss,MatVec_CapsNet,'dynamic']]
-    #parameter=[[spread_loss,MatVec_CapsNet,'dual']]
-
-    #parameter=[[weighted_spread_loss,SegCaps_multilabels,'']]
-    
-    #grid_search_parameter=[{'loss_function':weighted_softmax,'network':SegCaps_multilabels,'model_file_path':'',
-     #       'routing_type':'','batch_size':1,'max_iter':90000,
-      #      'test_iter':250,'data_aug':True,
-       #     'num_labels':5,'learning_rates':0.01,
-        #    'data_format':'channels_first',
-         #   'save_debug_images':False,'image_size':[256,256],
-          #  'aug_dict_path':'./aug_dict_prob.json','patience':90000,'earlystop_sp':0.0001,
-           # 'class_weights_arr':np.array([1,31.64997857, 292.64977218, 284.74978171,183.73985934]),
-           # 'output_folder':'SegCaps_multilabels_2019-11-09_01-25-53',
-           # 'current_iter':82000}]
+    #Load pickle file denoting analysis to be used in grid seach parameters
     with open('parameter_rerun_segcaps_14_nov_19_mk2.pickle','rb') as fb:
         grid_search_parameter=pickle.load(fb)
     
@@ -304,15 +288,8 @@ if __name__ == '__main__':
     
     for param in grid_search_parameter:
             param['loss_function']=loss_func_dict[param['loss_function']]
-            param['network']=SegCaps_multilabels
-            param['current_iter']=7500
-            param['max_iter']=12500
-            param['patience']=12500
-            param['test_file_path_bool']=False
-            param['test_file_paths']=None#'fold3.txt'
-            tmp_dir='./Experiments/'+param['output_folder']+'/weights'
-
- 
+                          #Testing for runnning on models that have already been generated this can be hashed out if 
+             #training for a new model is required. 
             if os.path.isdir(tmp_dir):#and param['output_folder'] in lock_lst:
                 #Iterating through each test set
                 loop = MainLoop(param)
